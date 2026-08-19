@@ -1,22 +1,21 @@
-# Seoul Trip 2026 — V2
+# Seoul Trip 2026 — V3
 
-## What's new
-- Editable itinerary
-- Drag/reorder activities within each day
-- Move up/down buttons (useful on iPhone)
-- Add/edit/delete activities
-- Add/edit days
-- Completion tracking + progress bar
-- Countdown to departure
-- "Next destination" card with Naver Map shortcut
-- Expense logger
-- Checklist
-- Export/import backup JSON
-- Proper PWA icons
-- Offline core app caching
+## New in V3
+- Redesigned mobile UI
+- Timeline itinerary
+- Auto Naver Map search button for every itinerary stop
+- Saved Places database
+- Add restaurants, cafes, shops, attractions, and optional places
+- Add any saved place into an itinerary day
+- Live map using Leaflet + OpenStreetMap
+- Current GPS location with a cute couple marker
+- Daily destination pins and route line
+- One-tap handoff to Naver Map
+- Booking wallet
+- Existing budget, checklist, backup/import, and offline shell
 
-## Update your existing GitHub Pages repository
-Upload/replace these files in the repository root:
+## Update GitHub Pages
+Replace/upload these files in the repository root:
 - index.html
 - manifest.webmanifest
 - sw.js
@@ -24,9 +23,9 @@ Upload/replace these files in the repository root:
 - icon-512.png
 - README.md
 
-Commit the changes. GitHub Pages will redeploy automatically.
+Commit to main. GitHub Pages redeploys automatically.
 
 ## Important
-V2 itinerary edits are stored locally in the browser using localStorage.
-They do not automatically modify GitHub.
-Use Settings → Export backup to save your phone changes.
+Live map tiles and Naver Map links require internet.
+Current GPS is handled by the browser on-device.
+Saved itinerary edits remain local unless you export a backup.
