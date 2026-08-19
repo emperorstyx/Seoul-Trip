@@ -5,82 +5,406 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111827">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Seoul 2026">
 <title>Seoul Trip 2026</title>
 <link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <style>
-:root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--radius:18px}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
-header{position:sticky;top:0;z-index:10;background:rgba(246,247,251,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.tabs{display:flex;gap:8px;overflow:auto;padding:10px 12px}.tabs button{white-space:nowrap;border:1px solid var(--line);background:#fff;padding:10px 12px;border-radius:12px;font-weight:700}.tabs .active{background:var(--accent);color:#fff}
-.wrap{max-width:900px;margin:auto;padding:14px 16px 100px}section{display:none}.show{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat{font-size:22px;font-weight:800}.muted{color:var(--muted)}.pill{display:inline-block;background:#eef2ff;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
-.activity{padding:10px 0;border-top:1px solid var(--line)}.activity:first-of-type{border-top:0}.time{font-size:12px;color:var(--muted);font-weight:700}
-.btn,button.primary{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;border:0;padding:10px 12px;border-radius:12px;font-weight:700}.secondary{background:#fff!important;color:var(--text)!important;border:1px solid var(--line)!important}
-.actions{display:flex;gap:8px;flex-wrap:wrap}input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:12px;background:#fff}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.check{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.check:first-child{border-top:0}.check input{width:20px}.expense{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}
-@media(min-width:760px){.grid{grid-template-columns:repeat(4,1fr)}}
+:root{
+  --bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;
+  --accent:#111827;--accent2:#4f46e5;--soft:#eef2ff;--good:#ecfdf5;--warn:#fff7ed;--danger:#fef2f2;
+  --radius:20px;--shadow:0 10px 30px rgba(17,24,39,.08)
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+header{position:sticky;top:0;z-index:50;background:rgba(246,247,251,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topbar{max-width:980px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
+.brand{font-weight:850}.install{font-size:12px}
+.tabs{display:flex;gap:8px;overflow:auto;padding:0 14px 10px;max-width:980px;margin:auto}
+.tabs button{white-space:nowrap;border:1px solid var(--line);background:#fff;padding:10px 12px;border-radius:12px;font-weight:750}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.wrap{max-width:980px;margin:auto;padding:16px 16px 110px}
+section{display:none}.show{display:block}
+.hero{padding:4px 0 10px}
+h1{font-size:30px;margin:8px 0 6px}h2{font-size:21px;margin:0 0 14px}h3{font-size:16px;margin:0 0 8px}
+p{line-height:1.5}.muted{color:var(--muted)}.tiny{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.stat{font-size:24px;font-weight:850}.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--soft);font-size:12px;font-weight:800}
+.good{background:var(--good)}.warn{background:var(--warn)}.danger{background:var(--danger)}
+.btn,button.primary{appearance:none;border:none;background:var(--accent);color:#fff;padding:10px 13px;border-radius:12px;font-weight:800;text-decoration:none;display:inline-block;cursor:pointer}
+.btn.secondary,button.secondary{background:#fff;color:var(--text);border:1px solid var(--line)}
+.btn.danger,button.danger{background:#b91c1c;color:#fff}
+.btn.small,button.small{padding:7px 9px;font-size:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.progress{height:10px;background:#eef0f4;border-radius:999px;overflow:hidden}.progress>div{height:100%;background:var(--accent2);width:0}
+.day{position:relative}.dayhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.activity{padding:11px 0;border-top:1px solid var(--line);position:relative}
+.activity:first-of-type{border-top:0}.time{font-size:12px;color:var(--muted);font-weight:800;margin-bottom:3px}
+.drag{cursor:grab;user-select:none;color:#9ca3af;font-size:18px;padding:3px}
+.activityrow{display:flex;gap:10px;align-items:flex-start}
+.activitymain{flex:1}
+.done strong,.done .muted,.done .time{text-decoration:line-through;opacity:.55}
+.checkline{display:flex;gap:9px;align-items:flex-start}
+.checkline input{width:20px;height:20px;margin-top:1px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+textarea{min-height:86px;resize:vertical}
+.modalback{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:100;padding:18px;overflow:auto}
+.modalback.open{display:block}.modal{max-width:620px;margin:5vh auto;background:#fff;border-radius:22px;padding:18px}
+.expense{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.restaurant{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.restaurant>div:first-child{flex:1}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.96);border-top:1px solid var(--line);padding:8px;display:flex;gap:6px}
+.bottom button{flex:1;border:none;background:#fff;padding:10px 4px;border-radius:10px;font-weight:750;font-size:12px}
+.korean{font-size:20px;font-weight:850;letter-spacing:.2px}
+@media(min-width:760px){.grid{grid-template-columns:repeat(4,1fr)}.bottom{display:none}}
 </style>
 </head>
 <body>
-<header><div class="tabs">
-<button class="active" data-tab="home">Home</button><button data-tab="itinerary">Itinerary</button><button data-tab="food">Food</button><button data-tab="budget">Budget</button><button data-tab="checklist">Checklist</button><button data-tab="info">Info</button>
-</div></header>
+<header>
+  <div class="topbar"><div class="brand">🇰🇷 Seoul Trip 2026</div><div class="tiny">V2 · Editable</div></div>
+  <div class="tabs">
+    <button class="active" data-tab="home">Home</button>
+    <button data-tab="itinerary">Itinerary</button>
+    <button data-tab="food">Food</button>
+    <button data-tab="budget">Budget</button>
+    <button data-tab="checklist">Checklist</button>
+    <button data-tab="info">Info</button>
+    <button data-tab="settings">Settings</button>
+  </div>
+</header>
+
 <main class="wrap">
 <section id="home" class="show">
-<span class="pill">27 Nov – 4 Dec 2026</span><h1>Seoul Trip 2026 🇰🇷</h1><p class="muted">Farhan & Biby · Myeongdong base</p>
-<div class="grid">
-<div class="card"><div class="muted">Hotel</div><div class="stat">ibis Styles</div><div class="muted">Myeongdong · RM2,700</div></div>
-<div class="card"><div class="muted">Arrival</div><div class="stat">28 Nov</div><div class="muted">06:30 · Incheon</div></div>
-<div class="card"><div class="muted">First sunset</div><div class="stat">Namsan</div><div class="muted">Cable car + N Seoul Tower</div></div>
-<div class="card"><div class="muted">Shopping</div><div class="stat">Cosmetics</div><div class="muted">Olive Young + Daiso</div></div>
-</div>
-<div class="card"><h2>Quick access</h2><div class="actions">
-<a class="btn" target="_blank" href="https://map.naver.com/p/search/ibis%20Styles%20Ambassador%20Seoul%20Myeongdong">Hotel</a>
-<a class="btn secondary" target="_blank" href="https://map.naver.com/p/search/%EB%8B%A4%EC%9D%B4%EC%86%8C%20%EB%AA%85%EB%8F%99%EC%97%AD%EC%A0%90">12-storey Daiso</a>
-<a class="btn secondary" target="_blank" href="https://map.naver.com/p/search/N%20Seoul%20Tower">N Seoul Tower</a>
-</div></div>
+  <div class="hero">
+    <span class="pill">27 Nov – 4 Dec 2026</span>
+    <h1>Seoul Trip 2026</h1>
+    <p class="muted">Farhan & Biby · Myeongdong base</p>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="muted">Countdown</div><div class="stat" id="countdown">—</div><div class="tiny">to departure</div></div>
+    <div class="card"><div class="muted">Hotel</div><div class="stat">ibis Styles</div><div class="tiny">Myeongdong · RM2,700</div></div>
+    <div class="card"><div class="muted">Arrival</div><div class="stat">28 Nov</div><div class="tiny">06:30 · Incheon</div></div>
+    <div class="card"><div class="muted">Progress</div><div class="stat" id="progressText">0%</div><div class="progress"><div id="progressBar"></div></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Next destination</h2>
+    <div id="nextDestination" class="muted">Your next planned activity will appear here.</div>
+  </div>
+
+  <div class="card">
+    <h2>Quick access</h2>
+    <div class="actions">
+      <a class="btn" target="_blank" href="https://map.naver.com/p/search/ibis%20Styles%20Ambassador%20Seoul%20Myeongdong">Hotel</a>
+      <a class="btn secondary" target="_blank" href="https://map.naver.com/p/search/%EB%8B%A4%EC%9D%B4%EC%86%8C%20%EB%AA%85%EB%8F%99%EC%97%AD%EC%A0%90">12-storey Daiso</a>
+      <a class="btn secondary" target="_blank" href="https://map.naver.com/p/search/N%20Seoul%20Tower">N Seoul Tower</a>
+    </div>
+  </div>
 </section>
-<section id="itinerary"><h2>Itinerary</h2><div id="days"></div></section>
-<section id="food"><h2>Food passport</h2><div id="foodList"></div></section>
+
+<section id="itinerary">
+  <div class="dayhead"><h2>Editable itinerary</h2><button class="primary small" onclick="openAddDay()">+ Add day</button></div>
+  <p class="muted">Drag activities within a day, move them up/down, edit times, or add/delete stops. Changes are saved on this phone.</p>
+  <div id="days"></div>
+</section>
+
+<section id="food">
+  <h2>Food passport</h2>
+  <div id="foodList"></div>
+</section>
+
 <section id="budget">
-<h2>Budget & spending</h2>
-<div class="card"><h3>Add expense</h3><div class="row"><input id="ename" placeholder="Olive Young"><input id="eamount" type="number" placeholder="Amount"></div><div class="row"><select id="ecurrency"><option>KRW</option><option>SGD</option><option>MYR</option></select><select id="ecat"><option>Food</option><option>Shopping</option><option>Transport</option><option>Attraction</option><option>Other</option></select></div><button class="primary" onclick="addExpense()">Add</button></div>
-<div class="card"><h3>Totals</h3><div id="totals" class="muted">No expenses yet.</div></div>
-<div class="card"><h3>Expense log</h3><div id="expenses"></div></div>
-<div class="card"><h3>SGD → KRW helper</h3><div class="row"><input id="sgd" type="number" value="100"><input id="rate" type="number" value="1080"></div><button class="primary" onclick="convert()">Convert</button><p id="conv" class="muted"></p></div>
+  <h2>Budget & spending</h2>
+  <div class="card">
+    <h3>Add expense</h3>
+    <div class="formgrid"><input id="ename" placeholder="e.g. Olive Young"><input id="eamount" type="number" step="0.01" placeholder="Amount"></div>
+    <div class="formgrid"><select id="ecurrency"><option>KRW</option><option>SGD</option><option>MYR</option></select><select id="ecat"><option>Food</option><option>Shopping</option><option>Transport</option><option>Attraction</option><option>Other</option></select></div>
+    <button class="primary" onclick="addExpense()">Add expense</button>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="muted">KRW spent</div><div class="stat" id="krwTotal">₩0</div></div>
+    <div class="card"><div class="muted">SGD spent</div><div class="stat" id="sgdTotal">S$0</div></div>
+    <div class="card"><div class="muted">MYR spent</div><div class="stat" id="myrTotal">RM0</div></div>
+    <div class="card"><div class="muted">Entries</div><div class="stat" id="expenseCount">0</div></div>
+  </div>
+  <div class="card"><h3>Expense log</h3><div id="expenses"></div></div>
+  <div class="card">
+    <h3>Manual SGD → KRW helper</h3>
+    <div class="formgrid"><input id="sgd" type="number" value="100"><input id="rate" type="number" value="1080"></div>
+    <button class="primary" onclick="convert()">Convert</button><p id="conv" class="muted"></p>
+  </div>
 </section>
-<section id="checklist"><h2>Checklist</h2><div class="card" id="checkItems"></div></section>
-<section id="info"><h2>Important info</h2>
-<div class="card"><h3>Hotel</h3><p><strong>ibis Styles Ambassador Seoul Myeongdong</strong><br>302 Samil-daero, Jung-gu, Seoul</p></div>
-<div class="card"><h3>Airport transfer</h3><p>Airport Limousine Bus 6015 → Myeongdong Station / Sejong Hotel area → walk to ibis Styles.</p></div>
-<div class="card"><h3>Apps</h3><p>Naver Map · Papago · Singtel roaming</p></div>
+
+<section id="checklist">
+  <h2>Checklist</h2>
+  <div class="card" id="checkItems"></div>
+</section>
+
+<section id="info">
+  <h2>Important info</h2>
+  <div class="card">
+    <h3>Hotel</h3>
+    <p><strong>ibis Styles Ambassador Seoul Myeongdong</strong><br>302 Samil-daero, Jung-gu, Seoul</p>
+    <p class="korean">이비스 스타일 앰배서더 서울 명동</p>
+    <div class="actions"><a class="btn small" target="_blank" href="https://map.naver.com/p/search/ibis%20Styles%20Ambassador%20Seoul%20Myeongdong">Open Naver Map</a></div>
+  </div>
+  <div class="card">
+    <h3>Airport transfer</h3>
+    <p>Airport Limousine Bus 6015 → Myeongdong Station / Sejong Hotel area → walk to ibis Styles.</p>
+    <div class="pill warn">Departure: collect luggage early and reach the stop with buffer.</div>
+  </div>
+  <div class="card">
+    <h3>Useful apps</h3>
+    <p>Naver Map · Papago · Singtel roaming</p>
+  </div>
+</section>
+
+<section id="settings">
+  <h2>App settings</h2>
+  <div class="card">
+    <h3>Backup your changes</h3>
+    <p class="muted">Export your itinerary, checklist and expenses to a JSON file. Import it later on another phone/browser.</p>
+    <div class="actions"><button class="primary" onclick="exportData()">Export backup</button><button class="secondary" onclick="document.getElementById('importFile').click()">Import backup</button><input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)"></div>
+  </div>
+  <div class="card danger">
+    <h3>Reset</h3>
+    <p class="muted">Restore the original V2 itinerary and clear local itinerary edits.</p>
+    <button class="danger" onclick="resetItinerary()">Reset itinerary</button>
+  </div>
 </section>
 </main>
+
+<div class="bottom">
+  <button onclick="showTab('home')">Home</button>
+  <button onclick="showTab('itinerary')">Itinerary</button>
+  <button onclick="showTab('budget')">Budget</button>
+  <button onclick="showTab('checklist')">Checklist</button>
+</div>
+
+<div id="activityModal" class="modalback">
+  <div class="modal">
+    <h2 id="modalTitle">Edit activity</h2>
+    <input type="hidden" id="editDay"><input type="hidden" id="editAct">
+    <div class="formgrid"><input id="mTime" placeholder="Time"><input id="mTitle" placeholder="Activity title"></div>
+    <textarea id="mDetail" placeholder="Details"></textarea>
+    <div class="actions" style="margin-top:10px"><button class="primary" onclick="saveActivity()">Save</button><button class="secondary" onclick="closeModal()">Cancel</button></div>
+  </div>
+</div>
+
+<div id="dayModal" class="modalback">
+  <div class="modal">
+    <h2>Add day</h2>
+    <div class="formgrid"><input id="newDayDate" placeholder="e.g. Sat, 5 Dec"><input id="newDayTitle" placeholder="Day title"></div>
+    <div class="actions"><button class="primary" onclick="addDay()">Add day</button><button class="secondary" onclick="document.getElementById('dayModal').classList.remove('open')">Cancel</button></div>
+  </div>
+</div>
+
 <script>
-const itinerary=[
-["Fri, 27 Nov","Fly to Korea",[["19:30","Depart Singapore","Evening flight to Seoul."]]],
-["Sat, 28 Nov","Arrival + Myeongdong + Namsan",[["06:30","Arrive Incheon","Immigration, luggage, Airport Limousine 6015."],["09:00","ibis Styles Myeongdong","Drop luggage / ask about early check-in."],["10:00","Daiso + Myeongdong","Easy first-day shopping and breakfast."],["15:30","Walk to Namsan Cable Car","Via Myeongdong Station / Pacific Hotel side."],["16:15","N Seoul Tower","Aim for sunset around 17:15, then night view."],["19:00","Dinner in Myeongdong","Keep first night relaxed."]]],
-["Sun, 29 Nov","Hanbok + Palace + Bukchon + Insadong",[["08:30","Daehan Hanbok","Traditional/Fusion rental near Gyeongbokgung."],["09:30","Gyeongbokgung Palace","Photos and palace visit."],["13:00","IFTAR","Beef bulgogi / galbi chicken / kimchi pancake."],["14:00","Bukchon Hanok Village","Walk and photos."],["15:30","Insadong","Souvenirs, tea, crafts and snacks."],["19:00","Kampungku","Fried chicken / army stew."]]],
-["Mon, 30 Nov","Nami Island Day",[["07:00","Depart Seoul","Use pre-booked day tour."],["09:00","Nami Island","Main sightseeing and photos."],["Afternoon","Garden of Morning Calm","Only if included in chosen tour."],["Evening","Return to Myeongdong","Rest and casual dinner."]]],
-["Tue, 1 Dec","Seongsu + Seoul Forest",[["10:30","Seongsu","Pop-ups, fashion, cosmetics and cafés."],["14:00","Seoul Forest","Relaxed walk and photos."],["17:00","Return to Myeongdong","Dinner / shopping."]]],
-["Wed, 2 Dec","Hongdae + Yeonnam",[["10:00","Hongdae","Explore shopping streets."],["12:00","Busanjib","L.A. Galbi + Jjajangmyeon."],["13:00","Yeonnam-dong","Gyeongui Line Forest Park."],["15:00","AK Plaza","Kakao Friends / Line Friends / shopping."],["19:00","Halal Stacks","Combo platter / fries."]]],
-["Thu, 3 Dec","COEX + Itaewon",[["10:00","COEX / Starfield Library","Explore Gangnam side."],["13:00","Itaewon","Salam Bakery / neighbourhood walk."],["14:00","Seoul Central Mosque","Visit mosque."],["16:00","EID Halal","BBQ lamb / beef bulgogi / bibimbap."],["18:00","Return to Myeongdong","Line 6 → Samgakji → Line 4."]]],
-["Fri, 4 Dec","Last shopping + Airport",[["09:00","Pack + checkout","Store luggage at hotel."],["12:00","BSJ Chicken","Original or seasoned fried chicken."],["13:00","Myeongdong shopping","Olive Young, snacks, souvenirs."],["15:15","Return to hotel","Collect luggage."],["15:40","Airport bus stop","Reach stop with buffer."],["16:00","Airport transfer","Bus to Incheon."]]]
+const DEFAULT_ITINERARY = [
+ {date:"Fri, 27 Nov",title:"Fly to Korea",items:[
+  {time:"19:30",title:"Depart Singapore",detail:"Evening flight to Seoul.",done:false}
+ ]},
+ {date:"Sat, 28 Nov",title:"Arrival + Myeongdong + Namsan",items:[
+  {time:"06:30",title:"Arrive Incheon",detail:"Immigration, luggage, Airport Limousine 6015.",done:false},
+  {time:"09:00",title:"ibis Styles Myeongdong",detail:"Drop luggage / ask about early check-in.",done:false},
+  {time:"10:00",title:"Daiso + Myeongdong",detail:"Easy first-day shopping and breakfast.",done:false},
+  {time:"15:30",title:"Walk to Namsan Cable Car",detail:"Via Myeongdong Station / Pacific Hotel side.",done:false},
+  {time:"16:15",title:"N Seoul Tower",detail:"Aim for sunset around 17:15, then night view.",done:false},
+  {time:"19:00",title:"Dinner in Myeongdong",detail:"Keep first night relaxed.",done:false}
+ ]},
+ {date:"Sun, 29 Nov",title:"Hanbok + Palace + Bukchon + Insadong",items:[
+  {time:"08:30",title:"Daehan Hanbok",detail:"Traditional/Fusion rental near Gyeongbokgung.",done:false},
+  {time:"09:30",title:"Gyeongbokgung Palace",detail:"Photos and palace visit.",done:false},
+  {time:"13:00",title:"IFTAR",detail:"Beef bulgogi / galbi chicken / kimchi pancake.",done:false},
+  {time:"14:00",title:"Bukchon Hanok Village",detail:"Walk and photos.",done:false},
+  {time:"15:30",title:"Insadong",detail:"Souvenirs, tea, crafts and snacks.",done:false},
+  {time:"19:00",title:"Kampungku",detail:"Fried chicken / army stew.",done:false}
+ ]},
+ {date:"Mon, 30 Nov",title:"Nami Island Day",items:[
+  {time:"07:00",title:"Depart Seoul",detail:"Use pre-booked day tour.",done:false},
+  {time:"09:00",title:"Nami Island",detail:"Main sightseeing and photos.",done:false},
+  {time:"Afternoon",title:"Garden of Morning Calm",detail:"Only if included in chosen tour.",done:false},
+  {time:"Evening",title:"Return to Myeongdong",detail:"Rest and casual dinner.",done:false}
+ ]},
+ {date:"Tue, 1 Dec",title:"Seongsu + Seoul Forest",items:[
+  {time:"10:30",title:"Seongsu",detail:"Pop-ups, fashion, cosmetics and cafés.",done:false},
+  {time:"14:00",title:"Seoul Forest",detail:"Relaxed walk and photos.",done:false},
+  {time:"17:00",title:"Return to Myeongdong",detail:"Dinner / shopping.",done:false}
+ ]},
+ {date:"Wed, 2 Dec",title:"Hongdae + Yeonnam",items:[
+  {time:"10:00",title:"Hongdae",detail:"Explore shopping streets.",done:false},
+  {time:"12:00",title:"Busanjib",detail:"L.A. Galbi + Jjajangmyeon.",done:false},
+  {time:"13:00",title:"Yeonnam-dong",detail:"Gyeongui Line Forest Park.",done:false},
+  {time:"15:00",title:"AK Plaza",detail:"Kakao Friends / Line Friends / shopping.",done:false},
+  {time:"19:00",title:"Halal Stacks",detail:"Combo platter / fries.",done:false}
+ ]},
+ {date:"Thu, 3 Dec",title:"COEX + Itaewon",items:[
+  {time:"10:00",title:"COEX / Starfield Library",detail:"Explore Gangnam side.",done:false},
+  {time:"13:00",title:"Itaewon",detail:"Salam Bakery / neighbourhood walk.",done:false},
+  {time:"14:00",title:"Seoul Central Mosque",detail:"Visit mosque.",done:false},
+  {time:"16:00",title:"EID Halal",detail:"BBQ lamb / beef bulgogi / bibimbap.",done:false},
+  {time:"18:00",title:"Return to Myeongdong",detail:"Line 6 → Samgakji → Line 4.",done:false}
+ ]},
+ {date:"Fri, 4 Dec",title:"Last shopping + Airport",items:[
+  {time:"09:00",title:"Pack + checkout",detail:"Store luggage at hotel.",done:false},
+  {time:"12:00",title:"BSJ Chicken",detail:"Original or seasoned fried chicken.",done:false},
+  {time:"13:00",title:"Myeongdong shopping",detail:"Olive Young, snacks, souvenirs.",done:false},
+  {time:"15:15",title:"Return to hotel",detail:"Collect luggage.",done:false},
+  {time:"15:40",title:"Airport bus stop",detail:"Reach stop with buffer.",done:false},
+  {time:"16:00",title:"Airport transfer",detail:"Bus to Incheon.",done:false}
+ ]}
 ];
-const foods=[["IFTAR","Beef Bulgogi · Galbi Chicken · Kimchi Pancake","Gyeongbokgung"],["Kampungku","Original Fried Chicken · Army Stew","Myeongdong"],["Busanjib","L.A. Galbi · Jjajangmyeon · Steamed Egg","Hongdae"],["Halal Stacks","Combo Platter · Chicken Platter · Secret Fries","Hongdae"],["Mari Meokja","Sundubu Jjigae · Dolsot Bibimbap","Myeongdong"],["EID Halal","BBQ Lamb · Beef Bulgogi · Bibimbap","Itaewon"],["BSJ Chicken","Original Fried Chicken · Seasoned Fried Chicken","Myeongdong"]];
-const checklist=["Passport","Travel insurance","Hotel booking","Flight booking","Nami Island tour","N Seoul Tower / cable car ticket","Hanbok plan","Singtel roaming checked","HEATTECH (2 sets per person)","Winter jacket","Gloves / beanie","ASICS GEL-NIMBUS 28","KRW cash","Backup bank card","Power bank","Universal adapter"];
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('section').forEach(s=>s.classList.remove('show'));document.getElementById(b.dataset.tab).classList.add('show');document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===b));});
-document.getElementById('days').innerHTML=itinerary.map(d=>`<div class="card"><span class="pill">${d[0]}</span><h2>${d[1]}</h2>${d[2].map(i=>`<div class="activity"><div class="time">${i[0]}</div><strong>${i[1]}</strong><div class="muted">${i[2]}</div></div>`).join('')}</div>`).join('');
-document.getElementById('foodList').innerHTML=foods.map(f=>`<div class="card"><h3>${f[0]}</h3><div class="muted">${f[2]}</div><p>${f[1]}</p><a class="btn" target="_blank" href="https://map.naver.com/p/search/${encodeURIComponent(f[0]+' Seoul')}">Open Naver Map</a></div>`).join('');
-document.getElementById('checkItems').innerHTML=checklist.map((x,i)=>`<label class="check"><input type="checkbox" ${localStorage.getItem('c'+i)==='1'?'checked':''} onchange="localStorage.setItem('c${i}',this.checked?'1':'0')"><span>${x}</span></label>`).join('');
-let expenses=JSON.parse(localStorage.getItem('expenses')||'[]');
-function addExpense(){let n=ename.value.trim(),a=parseFloat(eamount.value);if(!n||!a)return;expenses.push({name:n,amount:a,currency:ecurrency.value,cat:ecat.value});localStorage.setItem('expenses',JSON.stringify(expenses));ename.value='';eamount.value='';render();}
-function del(i){expenses.splice(i,1);localStorage.setItem('expenses',JSON.stringify(expenses));render();}
-function render(){expenses.innerHTML;document.getElementById('expenses').innerHTML=expenses.length?expenses.map((e,i)=>`<div class="expense"><div><strong>${e.name}</strong><div class="muted">${e.cat}</div></div><div><strong>${e.currency} ${e.amount.toFixed(2)}</strong><br><button class="secondary" onclick="del(${i})">Delete</button></div></div>`).join(''):'<div class="muted">No expenses yet.</div>';let t={};expenses.forEach(e=>t[e.currency]=(t[e.currency]||0)+e.amount);document.getElementById('totals').innerHTML=Object.keys(t).length?Object.entries(t).map(([c,v])=>`<div><strong>${c}</strong> ${v.toFixed(2)}</div>`).join(''):'No expenses yet.';}
-render();
+
+const FOOD = [
+ ["IFTAR","Beef Bulgogi · Galbi Chicken · Kimchi Pancake","Gyeongbokgung"],
+ ["Kampungku","Original Fried Chicken · Army Stew","Myeongdong"],
+ ["Busanjib","L.A. Galbi · Jjajangmyeon · Steamed Egg","Hongdae"],
+ ["Halal Stacks","Combo Platter · Chicken Platter · Secret Fries","Hongdae"],
+ ["Mari Meokja","Sundubu Jjigae · Dolsot Bibimbap","Myeongdong"],
+ ["EID Halal","BBQ Lamb · Beef Bulgogi · Bibimbap","Itaewon"],
+ ["BSJ Chicken","Original Fried Chicken · Seasoned Fried Chicken","Myeongdong"]
+];
+const CHECKLIST = ["Passport","Travel insurance","Hotel booking","Flight booking","Nami Island tour","N Seoul Tower / cable car ticket","Hanbok plan","Singtel roaming checked","HEATTECH (2 sets per person)","Winter jacket","Gloves / beanie","ASICS GEL-NIMBUS 28","KRW cash","Backup bank card","Power bank","Universal adapter"];
+
+let itinerary = JSON.parse(localStorage.getItem("v2_itinerary") || "null") || structuredClone(DEFAULT_ITINERARY);
+let expensesData = JSON.parse(localStorage.getItem("v2_expenses") || "[]");
+let checklistData = JSON.parse(localStorage.getItem("v2_checklist") || "{}");
+
+function persistItinerary(){localStorage.setItem("v2_itinerary",JSON.stringify(itinerary)); renderItinerary(); updateDashboard();}
+function showTab(id){
+ document.querySelectorAll("section").forEach(s=>s.classList.remove("show"));
+ document.getElementById(id).classList.add("show");
+ document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));
+ scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+function renderItinerary(){
+ const wrap=document.getElementById("days");
+ wrap.innerHTML="";
+ itinerary.forEach((day,di)=>{
+  const card=document.createElement("div"); card.className="card day";
+  card.innerHTML=`<div class="dayhead"><div><span class="pill">${day.date}</span><h2 style="margin-top:9px">${day.title}</h2></div>
+  <div class="actions"><button class="small secondary" onclick="editDay(${di})">Edit day</button><button class="small primary" onclick="openAddActivity(${di})">+ Stop</button></div></div>
+  <div class="activities" data-day="${di}"></div>`;
+  wrap.appendChild(card);
+  const actWrap=card.querySelector(".activities");
+  day.items.forEach((a,ai)=>{
+   const div=document.createElement("div"); div.className="activity"+(a.done?" done":""); div.draggable=true; div.dataset.index=ai;
+   div.innerHTML=`<div class="activityrow">
+    <div class="drag" title="Drag">☰</div>
+    <div class="activitymain">
+      <div class="checkline"><input type="checkbox" ${a.done?"checked":""} onchange="toggleDone(${di},${ai},this.checked)">
+      <div><div class="time">${a.time}</div><strong>${a.title}</strong><div class="muted">${a.detail}</div>
+      <div class="actions" style="margin-top:8px">
+        <button class="small secondary" onclick="openEditActivity(${di},${ai})">Edit</button>
+        <button class="small secondary" onclick="moveActivity(${di},${ai},-1)">↑</button>
+        <button class="small secondary" onclick="moveActivity(${di},${ai},1)">↓</button>
+        <button class="small danger" onclick="deleteActivity(${di},${ai})">Delete</button>
+      </div></div></div>
+    </div></div>`;
+   actWrap.appendChild(div);
+  });
+  enableDrag(actWrap,di);
+ });
+}
+
+function enableDrag(container,di){
+ let dragged=null;
+ container.querySelectorAll(".activity").forEach(el=>{
+  el.addEventListener("dragstart",()=>{dragged=+el.dataset.index;});
+  el.addEventListener("dragover",e=>e.preventDefault());
+  el.addEventListener("drop",e=>{
+   e.preventDefault(); const target=+el.dataset.index;
+   if(dragged===null||dragged===target)return;
+   const [item]=itinerary[di].items.splice(dragged,1);
+   itinerary[di].items.splice(target,0,item);
+   persistItinerary();
+  });
+ });
+}
+function toggleDone(di,ai,val){itinerary[di].items[ai].done=val;persistItinerary();}
+function moveActivity(di,ai,dir){
+ const ni=ai+dir;if(ni<0||ni>=itinerary[di].items.length)return;
+ const arr=itinerary[di].items; [arr[ai],arr[ni]]=[arr[ni],arr[ai]];persistItinerary();
+}
+function deleteActivity(di,ai){if(confirm("Delete this activity?")){itinerary[di].items.splice(ai,1);persistItinerary();}}
+function openEditActivity(di,ai){
+ editDay.value=di;editAct.value=ai;mTime.value=itinerary[di].items[ai].time;mTitle.value=itinerary[di].items[ai].title;mDetail.value=itinerary[di].items[ai].detail;
+ modalTitle.textContent="Edit activity";activityModal.classList.add("open");
+}
+function openAddActivity(di){
+ editDay.value=di;editAct.value=-1;mTime.value="";mTitle.value="";mDetail.value="";modalTitle.textContent="Add activity";activityModal.classList.add("open");
+}
+function saveActivity(){
+ const di=+editDay.value, ai=+editAct.value;
+ const obj={time:mTime.value.trim(),title:mTitle.value.trim(),detail:mDetail.value.trim(),done:false};
+ if(!obj.title)return alert("Enter an activity title.");
+ if(ai===-1) itinerary[di].items.push(obj); else {obj.done=itinerary[di].items[ai].done; itinerary[di].items[ai]=obj;}
+ closeModal();persistItinerary();
+}
+function closeModal(){activityModal.classList.remove("open");}
+function editDay(di){
+ const d=prompt("Day/date label:",itinerary[di].date); if(d===null)return;
+ const t=prompt("Day title:",itinerary[di].title); if(t===null)return;
+ itinerary[di].date=d;itinerary[di].title=t;persistItinerary();
+}
+function openAddDay(){dayModal.classList.add("open");}
+function addDay(){
+ if(!newDayDate.value.trim()||!newDayTitle.value.trim())return;
+ itinerary.push({date:newDayDate.value.trim(),title:newDayTitle.value.trim(),items:[]});
+ newDayDate.value="";newDayTitle.value="";dayModal.classList.remove("open");persistItinerary();
+}
+
+function updateDashboard(){
+ const dep=new Date("2026-11-27T19:30:00+08:00"), now=new Date();
+ const ms=dep-now; countdown.textContent=ms>0?Math.ceil(ms/86400000)+" days":"Trip time!";
+ let total=0,done=0,next=null;
+ itinerary.forEach(d=>d.items.forEach(a=>{total++;if(a.done)done++;else if(!next)next={day:d.date,...a};}));
+ const pct=total?Math.round(done/total*100):0;progressText.textContent=pct+"%";progressBar.style.width=pct+"%";
+ nextDestination.innerHTML=next?`<span class="pill">${next.day}</span><h3 style="margin-top:9px">${next.time} · ${next.title}</h3><div class="muted">${next.detail}</div><div class="actions" style="margin-top:10px"><a class="btn small" target="_blank" href="https://map.naver.com/p/search/${encodeURIComponent(next.title+' Seoul')}">Open Naver Map</a></div>`:"Everything completed 🎉";
+}
+
+function renderFood(){
+ foodList.innerHTML=FOOD.map(f=>`<div class="card restaurant"><div><h3>${f[0]}</h3><div class="tiny">${f[2]}</div><p>${f[1]}</p></div><a class="btn small" target="_blank" href="https://map.naver.com/p/search/${encodeURIComponent(f[0]+' Seoul')}">Map</a></div>`).join("");
+}
+
+function addExpense(){
+ const n=ename.value.trim(), a=parseFloat(eamount.value); if(!n||!a)return;
+ expensesData.push({name:n,amount:a,currency:ecurrency.value,cat:ecat.value});
+ localStorage.setItem("v2_expenses",JSON.stringify(expensesData)); ename.value="";eamount.value="";renderExpenses();
+}
+function deleteExpense(i){expensesData.splice(i,1);localStorage.setItem("v2_expenses",JSON.stringify(expensesData));renderExpenses();}
+function renderExpenses(){
+ expenses.innerHTML=expensesData.length?expensesData.map((e,i)=>`<div class="expense"><div><strong>${e.name}</strong><div class="tiny">${e.cat}</div></div><div style="text-align:right"><strong>${e.currency} ${e.amount.toFixed(2)}</strong><br><button class="small secondary" onclick="deleteExpense(${i})">Delete</button></div></div>`).join(""):'<div class="muted">No expenses yet.</div>';
+ const t={KRW:0,SGD:0,MYR:0};expensesData.forEach(e=>t[e.currency]+=e.amount);
+ krwTotal.textContent="₩"+Math.round(t.KRW).toLocaleString();sgdTotal.textContent="S$"+t.SGD.toFixed(2);myrTotal.textContent="RM"+t.MYR.toFixed(2);expenseCount.textContent=expensesData.length;
+}
 function convert(){conv.textContent=`SGD ${(+sgd.value).toFixed(2)} ≈ KRW ${Math.round((+sgd.value)*(+rate.value)).toLocaleString()}`;}
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js');
+
+function renderChecklist(){
+ checkItems.innerHTML=CHECKLIST.map((x,i)=>`<label class="checkline" style="padding:10px 0;border-top:${i?'1px solid var(--line)':'none'}"><input type="checkbox" ${checklistData[i]?"checked":""} onchange="checklistData[${i}]=this.checked;localStorage.setItem('v2_checklist',JSON.stringify(checklistData))"><span>${x}</span></label>`).join("");
+}
+
+function exportData(){
+ const data={version:2,exported:new Date().toISOString(),itinerary,expensesData,checklistData};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="seoul-trip-2026-backup.json";a.click();URL.revokeObjectURL(a.href);
+}
+function importData(e){
+ const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{const d=JSON.parse(r.result);if(d.itinerary)itinerary=d.itinerary;if(d.expensesData)expensesData=d.expensesData;if(d.checklistData)checklistData=d.checklistData;
+ localStorage.setItem("v2_itinerary",JSON.stringify(itinerary));localStorage.setItem("v2_expenses",JSON.stringify(expensesData));localStorage.setItem("v2_checklist",JSON.stringify(checklistData));
+ renderItinerary();renderExpenses();renderChecklist();updateDashboard();alert("Backup imported.");}catch(err){alert("Invalid backup file.");}};
+ r.readAsText(f);
+}
+function resetItinerary(){if(confirm("Reset itinerary to original V2?")){itinerary=structuredClone(DEFAULT_ITINERARY);localStorage.setItem("v2_itinerary",JSON.stringify(itinerary));persistItinerary();}}
+
+renderItinerary();renderFood();renderExpenses();renderChecklist();updateDashboard();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js");
 </script>
 </body>
 </html>

@@ -1,12 +1,32 @@
-# Seoul Trip 2026
+# Seoul Trip 2026 — V2
 
-## Deploy to GitHub Pages
-1. Create a new GitHub repository, for example `seoul-trip-2026`.
-2. Upload `index.html`, `manifest.webmanifest`, and `sw.js` to the repository root.
-3. Go to Settings → Pages.
-4. Choose Deploy from a branch.
-5. Select `main` and `/ (root)`.
-6. Open the GitHub Pages URL on your iPhone in Safari.
-7. Tap Share → Add to Home Screen.
+## What's new
+- Editable itinerary
+- Drag/reorder activities within each day
+- Move up/down buttons (useful on iPhone)
+- Add/edit/delete activities
+- Add/edit days
+- Completion tracking + progress bar
+- Countdown to departure
+- "Next destination" card with Naver Map shortcut
+- Expense logger
+- Checklist
+- Export/import backup JSON
+- Proper PWA icons
+- Offline core app caching
 
-The checklist and expense logger are saved locally on the phone using localStorage.
+## Update your existing GitHub Pages repository
+Upload/replace these files in the repository root:
+- index.html
+- manifest.webmanifest
+- sw.js
+- icon-192.png
+- icon-512.png
+- README.md
+
+Commit the changes. GitHub Pages will redeploy automatically.
+
+## Important
+V2 itinerary edits are stored locally in the browser using localStorage.
+They do not automatically modify GitHub.
+Use Settings → Export backup to save your phone changes.
