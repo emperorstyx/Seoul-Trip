@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2456aa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Our Trips">
-<title>Our Trips V6.1</title>
+<title>Our Trips V6.2</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -46,6 +46,15 @@ input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);borde
 .syncDot{width:9px;height:9px;border-radius:50%;display:inline-block;background:#f59e0b;margin-right:5px}.syncDot.ok{background:#22c55e}.syncDot.off{background:#94a3b8}
 .locationBar{display:flex;justify-content:space-between;gap:10px;align-items:center}.toggle{position:relative;width:48px;height:28px;background:#cbd5e1;border-radius:99px}.toggle:after{content:"";position:absolute;width:22px;height:22px;top:3px;left:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 4px #0003}.toggle.on{background:#22c55e}.toggle.on:after{left:23px}
 @media(min-width:760px){.grid{grid-template-columns:repeat(4,1fr)}}@media(max-width:560px){.row{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}}
+
+/* V6.2 update UX */
+#appUpdateBar{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:5000;
+display:none;align-items:center;gap:10px;max-width:calc(100% - 28px);padding:10px 12px;
+background:#fff;border:1px solid #d8e4f5;border-radius:16px;box-shadow:0 12px 30px rgba(18,55,100,.18)}
+#appUpdateBar.show{display:flex}
+#appUpdateBar span{font-size:14px;font-weight:700;color:#102b55}
+#appUpdateBar button{padding:9px 12px;border:0;border-radius:12px;background:#2458ad;color:white;font-weight:800}
+
 </style>
 </head>
 <body>
@@ -277,7 +286,50 @@ async function refreshCloud(){await loadTrips();if(activeTrip)await loadCloudDat
 function setFont(v){document.documentElement.style.setProperty('--fs',v);localStorage.setItem('v6font',v)}
 sb.auth.onAuthStateChange((event,session)=>{if(session?.user&&!user)enterApp(session.user);if(!session?.user&&user)location.reload()});
 (async()=>{let {data}=await sb.auth.getSession();if(data.session?.user)await enterApp(data.session.user);let f=localStorage.getItem('v6font');if(f){fontSize.value=f;setFont(f)}})();
-if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');
+if('serviceWorker'in navigator)registerOurTripsServiceWorker();
+
+// V6.2: predictable PWA updates. HTML is network-first in sw.js.
+let pendingOurTripsWorker = null;
+function showOurTripsUpdate(worker){
+  pendingOurTripsWorker = worker || null;
+  const bar = document.getElementById('appUpdateBar');
+  if(bar) bar.classList.add('show');
+}
+async function registerOurTripsServiceWorker(){
+  if(!('serviceWorker' in navigator)) return;
+  try{
+    const reg = await navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'});
+    reg.update().catch(()=>{});
+    if(reg.waiting && navigator.serviceWorker.controller) showOurTripsUpdate(reg.waiting);
+    reg.addEventListener('updatefound', ()=>{
+      const w = reg.installing;
+      if(!w) return;
+      w.addEventListener('statechange', ()=>{
+        if(w.state === 'installed' && navigator.serviceWorker.controller) showOurTripsUpdate(w);
+      });
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+      if(sessionStorage.getItem('ourTripsReloading') === '1') return;
+      sessionStorage.setItem('ourTripsReloading','1');
+      location.reload();
+    });
+  }catch(e){ console.warn('Service worker registration failed', e); }
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  const b=document.getElementById('applyAppUpdate');
+  if(b) b.addEventListener('click', ()=>{
+    if(pendingOurTripsWorker) pendingOurTripsWorker.postMessage({type:'SKIP_WAITING'});
+    else location.reload();
+  });
+  registerOurTripsServiceWorker();
+});
+
 </script>
+
+<div id="appUpdateBar" role="status" aria-live="polite">
+  <span>✨ A new Our Trips update is ready.</span>
+  <button type="button" id="applyAppUpdate">Update now</button>
+</div>
+
 </body>
 </html>

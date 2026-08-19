@@ -1,12 +1,23 @@
-# Our Trips V6.1 — Seoul Cloud Migration
+# Our Trips V6.2 — Stable Couple Build
 
-Adds a one-time **Import Seoul 2026 to Cloud** button.
+V6.2 keeps the working V6.1 Supabase cloud trip and Seoul import, and fixes the PWA update/cache problem.
 
-After login:
-1. Open All Trips.
-2. Tap Import Seoul 2026 to Cloud.
-3. The app creates the Seoul 2026 trip, uploads the built-in itinerary and saved Places to Supabase, then opens it.
-4. It will not duplicate itinerary/Places if the cloud trip already contains them.
-5. Once Seoul 2026 exists in your cloud account, the import card hides.
+## What changed
+- Network-first loading for app HTML, so GitHub Pages updates should no longer stay stuck on an old screen.
+- Old app caches are removed automatically when V6.2 activates.
+- Service-worker update checks bypass the HTTP cache.
+- In-app “Update now” notice when a newer service worker is ready.
+- Existing Supabase cloud sync, couple trip codes, realtime itinerary/Places/expenses/checklists, location sharing, weather, map and MYR conversion are retained.
 
-V6 cloud sync, couple join code, realtime data, location sharing, weather and MYR expense conversion remain included.
+## Deploy
+Upload/replace:
+- index.html
+- sw.js
+- manifest.webmanifest
+- icon-192.png
+- icon-512.png
+- README.md
+
+You do NOT need to run V6_SUPABASE_PATCH.sql again if V6/V6.1 SQL already succeeded.
+
+For this one upgrade from V6.1 to V6.2, open the GitHub Pages site once with `?v=62` if the installed/browser app is still showing the old cached version. After V6.2 takes control, future releases should update normally.
