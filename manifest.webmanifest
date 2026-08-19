@@ -1,6 +1,6 @@
 {
-  "name": "Seoul Trip 2026",
-  "short_name": "Seoul 2026",
+  "name": "Our Trips",
+  "short_name": "Our Trips",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
