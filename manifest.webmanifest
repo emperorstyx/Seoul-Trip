@@ -4,9 +4,8 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f6f7fb",
-  "theme_color": "#111827",
-  "description": "Editable Seoul trip companion with live map, saved places, food guide and budget.",
+  "background_color": "#f7faff",
+  "theme_color": "#1e4ea0",
   "icons": [
     {
       "src": "./icon-192.png",

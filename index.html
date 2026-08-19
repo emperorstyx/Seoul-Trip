@@ -1,251 +1,85 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111827">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Seoul 2026">
-<title>Seoul Trip 2026 V3</title>
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="apple-touch-icon" href="./icon-192.png">
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1e4ea0"><meta name="apple-mobile-web-app-capable" content="yes"><title>Seoul Trip 2026 V4</title>
+<link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--accent2:#4f46e5;--soft:#eef2ff;--good:#ecfdf5;--warn:#fff7ed;--danger:#fef2f2;--radius:20px;--shadow:0 10px 30px rgba(17,24,39,.08)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
-button,input,select,textarea{font:inherit}header{position:sticky;top:0;z-index:50;background:rgba(246,247,251,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.topbar{max-width:980px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:10px 14px}.brand{font-weight:850}.tabs{display:flex;gap:8px;overflow:auto;padding:0 14px 10px;max-width:980px;margin:auto}
-.tabs button{white-space:nowrap;border:1px solid var(--line);background:#fff;padding:10px 12px;border-radius:12px;font-weight:750}.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.wrap{max-width:980px;margin:auto;padding:16px 16px 110px}section{display:none}.show{display:block}.hero{padding:4px 0 10px}h1{font-size:30px;margin:8px 0 6px}h2{font-size:21px;margin:0 0 14px}h3{font-size:16px;margin:0 0 8px}p{line-height:1.5}.muted{color:var(--muted)}.tiny{font-size:12px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}.stat{font-size:24px;font-weight:850}
-.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--soft);font-size:12px;font-weight:800}.good{background:var(--good)}.warn{background:var(--warn)}.dangerbox{background:var(--danger)}
-.btn,button.primary{appearance:none;border:none;background:var(--accent);color:#fff;padding:10px 13px;border-radius:12px;font-weight:800;text-decoration:none;display:inline-block;cursor:pointer}.btn.secondary,button.secondary{background:#fff;color:var(--text);border:1px solid var(--line)}button.danger{background:#b91c1c;color:#fff;border:0}.btn.small,button.small{padding:7px 9px;font-size:12px}
-.actions{display:flex;gap:8px;flex-wrap:wrap}.progress{height:10px;background:#eef0f4;border-radius:999px;overflow:hidden}.progress>div{height:100%;background:var(--accent2);width:0}.dayhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.activity{padding:11px 0;border-top:1px solid var(--line)}.activity:first-of-type{border-top:0}.activityrow{display:flex;gap:10px;align-items:flex-start}.activitymain{flex:1}.time{font-size:12px;color:var(--muted);font-weight:800;margin-bottom:3px}.drag{cursor:grab;color:#9ca3af;font-size:18px}.done strong,.done .muted,.done .time{text-decoration:line-through;opacity:.55}
-.checkline{display:flex;gap:9px;align-items:flex-start}.checkline input{width:20px;height:20px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}textarea{min-height:86px}
-.modalback{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:100;padding:18px;overflow:auto}.modalback.open{display:block}.modal{max-width:650px;margin:4vh auto;background:#fff;border-radius:22px;padding:18px}
-.placecard{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.placecard>div:first-child{flex:1}.expense{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
-#map{height:430px;border-radius:18px;overflow:hidden;border:1px solid var(--line)}.couple-marker{font-size:30px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}.korean{font-size:20px;font-weight:850}
-.bottom{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.97);border-top:1px solid var(--line);padding:8px;display:flex;gap:6px}.bottom button{flex:1;border:none;background:#fff;padding:10px 4px;border-radius:10px;font-weight:750;font-size:12px}
-@media(min-width:760px){.grid{grid-template-columns:repeat(4,1fr)}.bottom{display:none}}
-</style>
-</head>
-<body>
-<header>
-<div class="topbar"><div class="brand">🇰🇷 Seoul Trip 2026</div><div class="tiny">V3 · Smart Places + Live Map</div></div>
-<div class="tabs">
-<button class="active" data-tab="home">Home</button><button data-tab="itinerary">Trip</button><button data-tab="mapsec">Map</button><button data-tab="places">Places</button><button data-tab="food">Food</button><button data-tab="budget">Spend</button><button data-tab="bookings">Bookings</button><button data-tab="checklist">Checklist</button><button data-tab="info">Info</button><button data-tab="settings">Settings</button>
-</div>
-</header>
-
-<main class="wrap">
+:root{--blue:#1e4ea0;--blue2:#eaf2ff;--red:#d93445;--bg:#f7faff;--card:#fff;--text:#14213d;--muted:#667085;--line:#dbe5f4;--fs:16px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:var(--fs)/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+button,input,select,textarea{font:inherit}header{position:sticky;top:0;z-index:50;background:rgba(247,250,255,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top{max-width:960px;margin:auto;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}.brand{font-weight:900;color:var(--blue)}
+main{max-width:960px;margin:auto;padding:16px 16px 100px}section{display:none}.show{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:0 8px 25px #1e4ea010}
+h1{font-size:2rem;margin:.25rem 0}h2{font-size:1.3rem}.muted{color:var(--muted)}.tiny{font-size:.78rem;color:var(--muted)}.stat{font-size:1.55rem;font-weight:900}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.pill{display:inline-block;background:var(--blue2);color:var(--blue);padding:5px 9px;border-radius:999px;font-size:.78rem;font-weight:800}
+.btn,button{border:0;border-radius:12px;padding:9px 12px;font-weight:800;cursor:pointer}.primary,.btn{background:var(--blue);color:white;text-decoration:none}.secondary{background:white;color:var(--blue);border:1px solid var(--line)}.red{background:var(--red);color:white}.actions{display:flex;gap:7px;flex-wrap:wrap}
+.activity,.place,.checkrow,.expense{padding:11px 0;border-top:1px solid var(--line)}.activity:first-child,.place:first-child,.checkrow:first-child{border-top:0}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:12px;background:white}textarea{min-height:75px}
+#map{height:420px;border-radius:18px}.couple{font-size:30px}.bottom{position:fixed;bottom:0;left:0;right:0;z-index:40;background:#fff;border-top:1px solid var(--line);display:flex;padding:7px}
+.bottom button{flex:1;background:white;color:var(--muted);padding:8px 2px;font-size:.72rem}.bottom button.active{color:var(--blue)}
+.weatherHero{background:linear-gradient(135deg,#eaf2ff,#fff);position:relative;overflow:hidden}.weatherTemp{font-size:3rem;font-weight:900;color:var(--blue)}.forecast{display:flex;gap:8px;overflow:auto}.forecast div{min-width:76px;background:white;border:1px solid var(--line);padding:9px;border-radius:14px;text-align:center}
+.modalbg{display:none;position:fixed;inset:0;background:#0006;z-index:100;padding:18px;overflow:auto}.modalbg.open{display:block}.modal{background:white;max-width:600px;margin:5vh auto;padding:18px;border-radius:22px}
+.tabs{display:flex;gap:7px;overflow:auto;margin-bottom:12px}.tabs button.active{background:var(--blue);color:#fff}.progress{height:9px;background:#edf1f7;border-radius:10px}.progress div{height:100%;background:var(--red);border-radius:10px}
+@media(min-width:760px){.grid{grid-template-columns:repeat(4,1fr)}}
+</style></head><body>
+<header><div class="top"><div class="brand">🇰🇷 Seoul 2026</div><div class="tiny">V4 · Couple Trip</div></div></header>
+<main>
 <section id="home" class="show">
-<div class="hero"><span class="pill">27 Nov – 4 Dec 2026</span><h1>Seoul Trip 2026</h1><p class="muted">Farhan & Biby · Myeongdong base</p></div>
-<div class="grid">
-<div class="card"><div class="muted">Countdown</div><div class="stat" id="countdown">—</div><div class="tiny">to departure</div></div>
-<div class="card"><div class="muted">Hotel</div><div class="stat">ibis Styles</div><div class="tiny">Myeongdong · RM2,700</div></div>
-<div class="card"><div class="muted">Arrival</div><div class="stat">28 Nov</div><div class="tiny">06:30 · Incheon</div></div>
-<div class="card"><div class="muted">Progress</div><div class="stat" id="progressText">0%</div><div class="progress"><div id="progressBar"></div></div></div>
-</div>
-<div class="card"><h2>Next destination</h2><div id="nextDestination" class="muted">Your next stop will appear here.</div></div>
-<div class="card"><h2>Quick access</h2><div class="actions">
-<a class="btn" target="_blank" href="https://map.naver.com/p/search/ibis%20Styles%20Ambassador%20Seoul%20Myeongdong">Hotel</a>
-<a class="btn secondary" target="_blank" href="https://map.naver.com/p/search/%EB%8B%A4%EC%9D%B4%EC%86%8C%20%EB%AA%85%EB%8F%99%EC%97%AD%EC%A0%90">12-storey Daiso</a>
-<button class="secondary" onclick="showTab('mapsec');setTimeout(initMap,250)">Today’s Map</button>
-</div></div>
+<span class="pill">27 NOV — 4 DEC 2026</span><h1>안녕, Seoul! ❤️</h1><p class="muted">Our Korea adventure</p>
+<div class="card weatherHero"><div class="tiny">SEOUL WEATHER</div><div class="weatherTemp" id="temp">--°C</div><div id="weatherText" class="muted">Tap refresh for live Seoul weather</div>
+<div class="actions" style="margin:10px 0"><button class="primary" onclick="loadWeather()">☁️ Refresh weather</button></div><div class="forecast" id="forecast"></div></div>
+<div class="grid"><div class="card"><div class="muted">Countdown</div><div class="stat" id="countdown">—</div></div><div class="card"><div class="muted">Arrival</div><div class="stat">28 Nov</div><div class="tiny">06:30 · ICN</div></div><div class="card"><div class="muted">Hotel</div><div class="stat">ibis Styles</div><div class="tiny">Myeongdong</div></div><div class="card"><div class="muted">Trip progress</div><div class="stat" id="progressText">0%</div><div class="progress"><div id="progressBar"></div></div></div></div>
+<div class="card"><h2>Next up</h2><div id="next">Your next stop will appear here.</div></div>
+<div class="card"><h2>Us on the trip</h2><div class="row"><div><b>👦 Me</b><div class="tiny" id="meStatus">Location off</div></div><div><b>👧 Wife</b><div class="tiny" id="wifeStatus">Shared sync not connected</div></div></div><button class="primary" onclick="showTab('map')">Open couple map</button></div>
 </section>
 
-<section id="itinerary">
-<div class="dayhead"><h2>Timeline itinerary</h2><button class="primary small" onclick="openAddDay()">+ Add day</button></div>
-<p class="muted">Edit, reorder, add stops, or save a place directly into any day. Every stop automatically gets a Naver Map search button.</p>
-<div id="days"></div>
-</section>
+<section id="trip"><div class="actions" style="justify-content:space-between"><h2>📅 Trip</h2><button class="primary" onclick="addStop()">+ Add stop</button></div><div id="days"></div></section>
+<section id="map"><h2>🗺️ Couple Map</h2><div class="card"><div class="actions"><button class="primary" onclick="locateMe()">👦 Show my location</button></div><div id="mapbox"></div><p class="tiny">Your marker works now. Wife live-location requires the shared cloud connection planned for this version's next setup step.</p></div></section>
+<section id="places"><div class="actions" style="justify-content:space-between"><h2>📍 Places</h2><button class="primary" onclick="placeModal.classList.add('open')">+ Add</button></div><div class="tabs" id="filters"></div><div id="placeList"></div></section>
+<section id="spend"><h2>💰 Spend</h2><div class="card"><div class="row"><input id="ename" placeholder="What did you buy?"><input id="eamt" type="number" placeholder="Amount"></div><div class="row"><select id="ecur"><option>KRW</option><option>SGD</option><option>MYR</option></select><select id="ecat"><option>Food</option><option>Shopping</option><option>Transport</option><option>Attraction</option><option>Other</option></select></div><button class="primary" onclick="addExpense()">Add expense</button></div><div class="card"><div id="totals"></div><div id="expenses"></div></div></section>
+<section id="more"><h2>☰ More</h2>
+<div class="card"><h2>✅ Checklists</h2><div class="tabs"><button class="active" onclick="showChecklist('me',this)">👦 Mine</button><button onclick="showChecklist('wife',this)">👧 Wife</button><button onclick="showChecklist('shared',this)">🤝 Shared</button></div><div class="row"><input id="newCheck" placeholder="Add item..."><button class="primary" onclick="addCheck()">Add</button></div><div id="checkList"></div></div>
+<div class="card"><h2>⚙️ Appearance & Settings</h2><label>Text size</label><select id="fontSetting" onchange="setFont(this.value)"><option value="14px">Small</option><option value="16px" selected>Normal</option><option value="18px">Large</option><option value="20px">Extra Large</option></select><br><br><label>Theme</label><select id="themeSetting" onchange="setTheme(this.value)"><option value="korea">🇰🇷 Korea Blue</option><option value="minimal">🤍 Minimal</option><option value="dark">🌙 Dark</option></select><p class="tiny">Appearance is stored only on this phone, so each person can choose their own.</p></div>
+<div class="card"><h2>☁️ Couple Sync</h2><p class="muted">The interface is ready for shared itinerary, places, spending, checklists and mutual location. A cloud project must be connected before two phones can sync.</p><span class="pill">Not connected yet</span></div>
+</section></main>
 
-<section id="mapsec">
-<h2>Today’s Map</h2>
-<div class="card">
-<div class="actions" style="margin-bottom:10px"><button class="primary" onclick="locateMe()">📍 Show us on map</button><button class="secondary" onclick="renderMapPins()">Refresh pins</button></div>
-<div id="map"></div>
-<p class="tiny">Your GPS stays on your device. Tap a stop marker for details and Naver Map navigation.</p>
-</div>
-</section>
+<nav class="bottom"><button class="active" data-tab="home" onclick="showTab('home')">🏠<br>Home</button><button data-tab="trip" onclick="showTab('trip')">📅<br>Trip</button><button data-tab="map" onclick="showTab('map')">🗺️<br>Map</button><button data-tab="places" onclick="showTab('places')">📍<br>Places</button><button data-tab="spend" onclick="showTab('spend')">💰<br>Spend</button><button data-tab="more" onclick="showTab('more')">☰<br>More</button></nav>
 
-<section id="places">
-<div class="dayhead"><h2>Saved places</h2><button class="primary small" onclick="openPlaceModal()">+ Add place</button></div>
-<p class="muted">Restaurants, cafés, shops, attractions, or “maybe” places. Add any saved place to an itinerary day later.</p>
-<div id="placesList"></div>
-</section>
-
-<section id="food">
-<div class="dayhead"><h2>Food passport</h2><button class="primary small" onclick="openPlaceModal('Restaurant')">+ Restaurant</button></div>
-<div id="foodList"></div>
-</section>
-
-<section id="budget">
-<h2>Budget & spending</h2>
-<div class="card"><h3>Add expense</h3><div class="formgrid"><input id="ename" placeholder="e.g. Olive Young"><input id="eamount" type="number" step="0.01" placeholder="Amount"></div><div class="formgrid"><select id="ecurrency"><option>KRW</option><option>SGD</option><option>MYR</option></select><select id="ecat"><option>Food</option><option>Shopping</option><option>Transport</option><option>Attraction</option><option>Other</option></select></div><button class="primary" onclick="addExpense()">Add expense</button></div>
-<div class="grid"><div class="card"><div class="muted">KRW spent</div><div class="stat" id="krwTotal">₩0</div></div><div class="card"><div class="muted">SGD spent</div><div class="stat" id="sgdTotal">S$0</div></div><div class="card"><div class="muted">MYR spent</div><div class="stat" id="myrTotal">RM0</div></div><div class="card"><div class="muted">Entries</div><div class="stat" id="expenseCount">0</div></div></div>
-<div class="card"><h3>Expense log</h3><div id="expenses"></div></div>
-</section>
-
-<section id="bookings">
-<h2>Booking wallet</h2>
-<div class="card" id="bookingList"></div>
-</section>
-
-<section id="checklist"><h2>Checklist</h2><div class="card" id="checkItems"></div></section>
-
-<section id="info">
-<h2>Important info</h2>
-<div class="card"><h3>Hotel</h3><p><strong>ibis Styles Ambassador Seoul Myeongdong</strong><br>302 Samil-daero, Jung-gu, Seoul</p><p class="korean">이비스 스타일 앰배서더 서울 명동</p><div class="actions"><a class="btn small" target="_blank" href="https://map.naver.com/p/search/ibis%20Styles%20Ambassador%20Seoul%20Myeongdong">Open Naver Map</a></div></div>
-<div class="card"><h3>Airport transfer</h3><p>Airport Limousine Bus 6015 → Myeongdong Station / Sejong Hotel area → walk to ibis Styles.</p></div>
-<div class="card"><h3>Useful apps</h3><p>Naver Map · Papago · Singtel roaming</p></div>
-</section>
-
-<section id="settings">
-<h2>Settings & backup</h2>
-<div class="card"><h3>Backup</h3><p class="muted">Export itinerary, saved places, expenses and checklist to JSON.</p><div class="actions"><button class="primary" onclick="exportData()">Export backup</button><button class="secondary" onclick="importFile.click()">Import backup</button><input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)"></div></div>
-<div class="card dangerbox"><h3>Reset itinerary</h3><button class="danger" onclick="resetItinerary()">Reset to V3 default</button></div>
-</section>
-</main>
-
-<div class="bottom"><button onclick="showTab('home')">Home</button><button onclick="showTab('itinerary')">Trip</button><button onclick="showTab('mapsec');setTimeout(initMap,250)">Map</button><button onclick="showTab('places')">Places</button><button onclick="showTab('budget')">Spend</button></div>
-
-<div id="activityModal" class="modalback"><div class="modal">
-<h2 id="modalTitle">Edit stop</h2>
-<input type="hidden" id="editDay"><input type="hidden" id="editAct">
-<div class="formgrid"><input id="mTime" placeholder="Time"><input id="mTitle" placeholder="Place / activity name"></div>
-<div class="formgrid"><input id="mArea" placeholder="Area, e.g. Hongdae"><select id="mType"><option>Attraction</option><option>Restaurant</option><option>Café</option><option>Shopping</option><option>Hotel</option><option>Transport</option><option>Other</option></select></div>
-<textarea id="mDetail" placeholder="Notes"></textarea>
-<div class="actions" style="margin-top:10px"><button class="primary" onclick="saveActivity()">Save</button><button class="secondary" onclick="closeModal()">Cancel</button></div>
-</div></div>
-
-<div id="placeModal" class="modalback"><div class="modal">
-<h2>Add saved place</h2>
-<div class="formgrid"><input id="pName" placeholder="Place name"><select id="pType"><option>Restaurant</option><option>Café</option><option>Shopping</option><option>Attraction</option><option>Hotel</option><option>Maybe</option></select></div>
-<div class="formgrid"><input id="pArea" placeholder="Area"><select id="pHalal"><option>Halal</option><option>Muslim-friendly</option><option>Check ingredients</option><option>Unknown</option><option>Not applicable</option></select></div>
-<input id="pPrice" placeholder="Price / budget, optional" style="margin-bottom:9px">
-<textarea id="pNotes" placeholder="Must try / notes"></textarea>
-<div class="actions" style="margin-top:10px"><button class="primary" onclick="savePlace()">Save place</button><button class="secondary" onclick="placeModal.classList.remove('open')">Cancel</button></div>
-</div></div>
-
-<div id="dayModal" class="modalback"><div class="modal"><h2>Add day</h2><div class="formgrid"><input id="newDayDate" placeholder="e.g. Sat, 5 Dec"><input id="newDayTitle" placeholder="Day title"></div><div class="actions"><button class="primary" onclick="addDay()">Add day</button><button class="secondary" onclick="dayModal.classList.remove('open')">Cancel</button></div></div></div>
-
+<div id="placeModal" class="modalbg"><div class="modal"><h2>Add place</h2><div class="row"><input id="pname" placeholder="Place name"><select id="ptype"><option>Food</option><option>Café</option><option>Shopping</option><option>Attraction</option><option>Maybe</option></select></div><div class="row"><input id="parea" placeholder="Area"><select id="phalal"><option>Halal</option><option>Muslim-friendly</option><option>Check ingredients</option><option>Unknown</option><option>Not applicable</option></select></div><textarea id="pnote" placeholder="Notes / must try"></textarea><div class="actions"><button class="primary" onclick="savePlace()">Save</button><button class="secondary" onclick="placeModal.classList.remove('open')">Cancel</button></div></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const DEFAULT_ITINERARY=[
-{date:"Fri, 27 Nov",title:"Fly to Korea",items:[{time:"19:30",title:"Depart Singapore",area:"Changi",type:"Transport",detail:"Evening flight to Seoul.",done:false}]},
-{date:"Sat, 28 Nov",title:"Arrival + Myeongdong + Namsan",items:[
-{time:"06:30",title:"Incheon International Airport",area:"Incheon",type:"Transport",detail:"Immigration, luggage, Airport Limousine 6015.",done:false,lat:37.4602,lng:126.4407},
-{time:"09:00",title:"ibis Styles Ambassador Seoul Myeongdong",area:"Myeongdong",type:"Hotel",detail:"Drop luggage / ask about early check-in.",done:false,lat:37.5613,lng:126.9895},
-{time:"10:00",title:"Daiso Myeongdong Station Branch",area:"Myeongdong",type:"Shopping",detail:"12-storey Daiso + easy first-day shopping.",done:false,lat:37.5605,lng:126.9855},
-{time:"15:30",title:"Namsan Cable Car",area:"Namsan",type:"Attraction",detail:"Walk via Myeongdong Station / Pacific Hotel side.",done:false,lat:37.5564,lng:126.9839},
-{time:"16:15",title:"N Seoul Tower",area:"Namsan",type:"Attraction",detail:"Aim for sunset around 17:15, then night view.",done:false,lat:37.5512,lng:126.9882}]},
-{date:"Sun, 29 Nov",title:"Hanbok + Palace + Bukchon + Insadong",items:[
-{time:"08:30",title:"Daehan Hanbok",area:"Gyeongbokgung",type:"Attraction",detail:"Traditional/Fusion rental.",done:false},
-{time:"09:30",title:"Gyeongbokgung Palace",area:"Jongno",type:"Attraction",detail:"Photos and palace visit.",done:false,lat:37.5796,lng:126.9770},
-{time:"13:00",title:"IFTAR Gyeongbokgung",area:"Jongno",type:"Restaurant",detail:"Beef bulgogi / galbi chicken / kimchi pancake.",done:false},
-{time:"14:00",title:"Bukchon Hanok Village",area:"Bukchon",type:"Attraction",detail:"Walk and photos.",done:false,lat:37.5826,lng:126.9830},
-{time:"15:30",title:"Insadong-gil",area:"Insadong",type:"Shopping",detail:"Souvenirs, tea, crafts and snacks.",done:false,lat:37.5740,lng:126.9850},
-{time:"19:00",title:"Kampungku Restaurant",area:"Myeongdong",type:"Restaurant",detail:"Fried chicken / army stew.",done:false}]},
-{date:"Mon, 30 Nov",title:"Nami Island Day",items:[
-{time:"07:00",title:"Depart Seoul",area:"Myeongdong",type:"Transport",detail:"Use pre-booked day tour.",done:false},
-{time:"09:00",title:"Nami Island",area:"Gapyeong",type:"Attraction",detail:"Main sightseeing and photos.",done:false,lat:37.7914,lng:127.5255},
-{time:"Afternoon",title:"Garden of Morning Calm",area:"Gapyeong",type:"Attraction",detail:"Only if included in chosen tour.",done:false,lat:37.7430,lng:127.3520}]},
-{date:"Tue, 1 Dec",title:"Seongsu + Seoul Forest",items:[
-{time:"10:30",title:"Seongsu-dong",area:"Seongsu",type:"Shopping",detail:"Pop-ups, fashion, cosmetics and cafés.",done:false,lat:37.5446,lng:127.0558},
-{time:"14:00",title:"Seoul Forest",area:"Seongsu",type:"Attraction",detail:"Relaxed walk and photos.",done:false,lat:37.5444,lng:127.0374}]},
-{date:"Wed, 2 Dec",title:"Hongdae + Yeonnam",items:[
-{time:"10:00",title:"Hongdae",area:"Hongdae",type:"Shopping",detail:"Explore shopping streets.",done:false,lat:37.5563,lng:126.9236},
-{time:"12:00",title:"Busanjib Hongdae",area:"Hongdae",type:"Restaurant",detail:"L.A. Galbi + Jjajangmyeon.",done:false},
-{time:"13:00",title:"Gyeongui Line Forest Park",area:"Yeonnam",type:"Attraction",detail:"Walk through Yeontral Park.",done:false,lat:37.5630,lng:126.9257},
-{time:"15:00",title:"AK Plaza Hongdae",area:"Hongdae",type:"Shopping",detail:"Kakao Friends / Line Friends / shopping.",done:false,lat:37.5577,lng:126.9250},
-{time:"19:00",title:"Halal Stacks",area:"Hongdae",type:"Restaurant",detail:"Combo platter / fries.",done:false}]},
-{date:"Thu, 3 Dec",title:"COEX + Itaewon",items:[
-{time:"10:00",title:"Starfield Library COEX",area:"Gangnam",type:"Attraction",detail:"Explore COEX.",done:false,lat:37.5117,lng:127.0592},
-{time:"13:00",title:"Itaewon",area:"Itaewon",type:"Attraction",detail:"Neighbourhood walk.",done:false,lat:37.5345,lng:126.9946},
-{time:"14:00",title:"Seoul Central Mosque",area:"Itaewon",type:"Attraction",detail:"Visit mosque.",done:false,lat:37.5334,lng:126.9975},
-{time:"16:00",title:"EID Halal Korean Food",area:"Itaewon",type:"Restaurant",detail:"BBQ lamb / beef bulgogi / bibimbap.",done:false}]},
-{date:"Fri, 4 Dec",title:"Last shopping + Airport",items:[
-{time:"09:00",title:"ibis Styles Ambassador Seoul Myeongdong",area:"Myeongdong",type:"Hotel",detail:"Pack, checkout and store luggage.",done:false,lat:37.5613,lng:126.9895},
-{time:"12:00",title:"BSJ Chicken",area:"Myeongdong",type:"Restaurant",detail:"Original or seasoned fried chicken.",done:false},
-{time:"13:00",title:"Myeongdong Shopping Street",area:"Myeongdong",type:"Shopping",detail:"Olive Young, snacks, souvenirs.",done:false,lat:37.5635,lng:126.9850},
-{time:"15:40",title:"Myeongdong Airport Limousine 6015 Stop",area:"Myeongdong",type:"Transport",detail:"Reach stop with buffer.",done:false}]}
-];
-const DEFAULT_PLACES=[
-{name:"IFTAR Gyeongbokgung",type:"Restaurant",area:"Jongno",halal:"Halal",price:"₩45,000–48,000 / 2",notes:"Beef Bulgogi · Galbi Chicken · Kimchi Pancake"},
-{name:"Kampungku Restaurant",type:"Restaurant",area:"Myeongdong",halal:"Halal",price:"~₩45,000 / 2",notes:"Original Fried Chicken · Army Stew"},
-{name:"Busanjib Hongdae",type:"Restaurant",area:"Hongdae",halal:"Halal",price:"~₩60,000 / 2",notes:"L.A. Galbi · Jjajangmyeon · Steamed Egg"},
-{name:"Halal Stacks",type:"Restaurant",area:"Hongdae",halal:"Halal",price:"~₩45,000 / 2",notes:"Combo Platter · Chicken Platter · Secret Fries"},
-{name:"Mari Meokja",type:"Restaurant",area:"Myeongdong",halal:"Halal",price:"~₩40,000 / 2",notes:"Sundubu Jjigae · Dolsot Bibimbap"},
-{name:"EID Halal Korean Food",type:"Restaurant",area:"Itaewon",halal:"Halal",price:"~₩50,000 / 2",notes:"BBQ Lamb · Beef Bulgogi · Bibimbap"},
-{name:"BSJ Chicken",type:"Restaurant",area:"Myeongdong",halal:"Halal",price:"~₩60,000 / 2",notes:"Original Fried Chicken · Seasoned Fried Chicken"}
-];
-const CHECKLIST=["Passport","Travel insurance","Hotel booking","Flight booking","Nami Island tour","N Seoul Tower / cable car ticket","Hanbok plan","Singtel roaming checked","HEATTECH (2 sets per person)","Winter jacket","Gloves / beanie","ASICS GEL-NIMBUS 28","KRW cash","Backup bank card","Power bank","Universal adapter"];
-const BOOKINGS=[["Flight","Booked","27 Nov · 19:30"],["Hotel","Booked","ibis Styles Myeongdong · RM2,700"],["Travel Insurance","Pending","Buy before trip"],["Nami Island Tour","Pending","Book later"],["N Seoul Tower / Cable Car","Pending","Book later"],["Hanbok","Planned","Daehan Hanbok"]];
-
-let itinerary=JSON.parse(localStorage.getItem("v3_itinerary")||"null")||structuredClone(DEFAULT_ITINERARY);
-let placesData=JSON.parse(localStorage.getItem("v3_places")||"null")||structuredClone(DEFAULT_PLACES);
-let expensesData=JSON.parse(localStorage.getItem("v3_expenses")||"[]");
-let checklistData=JSON.parse(localStorage.getItem("v3_checklist")||"{}");
-let map,userMarker,routeLayer,pinLayers=[];
-
-function persist(){localStorage.setItem("v3_itinerary",JSON.stringify(itinerary));renderItinerary();updateDashboard();if(map)renderMapPins();}
-function showTab(id){document.querySelectorAll("section").forEach(s=>s.classList.remove("show"));document.getElementById(id).classList.add("show");document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));scrollTo({top:0,behavior:"smooth"});}
-document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
-function naverSearch(name,area=""){return "https://map.naver.com/p/search/"+encodeURIComponent(name+" "+area+" Seoul");}
-function naverScheme(name){return "nmap://search?query="+encodeURIComponent(name)+"&appname=seoul.trip.2026";}
-function renderItinerary(){
- days.innerHTML="";
- itinerary.forEach((day,di)=>{
-  const card=document.createElement("div");card.className="card";
-  card.innerHTML=`<div class="dayhead"><div><span class="pill">${day.date}</span><h2 style="margin-top:9px">${day.title}</h2></div><div class="actions"><button class="small secondary" onclick="editDay(${di})">Edit day</button><button class="small primary" onclick="openAddActivity(${di})">+ Stop</button></div></div><div class="activities"></div>`;
-  const wrap=card.querySelector(".activities");
-  day.items.forEach((a,ai)=>{
-   const div=document.createElement("div");div.className="activity"+(a.done?" done":"");div.draggable=true;div.dataset.index=ai;
-   div.innerHTML=`<div class="activityrow"><div class="drag">☰</div><div class="activitymain"><div class="checkline"><input type="checkbox" ${a.done?"checked":""} onchange="toggleDone(${di},${ai},this.checked)"><div><div class="time">${a.time} · ${a.type||"Stop"}</div><strong>${a.title}</strong><div class="muted">${a.area?("📍 "+a.area+" · "):""}${a.detail||""}</div><div class="actions" style="margin-top:8px"><a class="btn small" target="_blank" href="${naverSearch(a.title,a.area)}">Naver Map</a><button class="small secondary" onclick="openEditActivity(${di},${ai})">Edit</button><button class="small secondary" onclick="moveActivity(${di},${ai},-1)">↑</button><button class="small secondary" onclick="moveActivity(${di},${ai},1)">↓</button><button class="small danger" onclick="deleteActivity(${di},${ai})">Delete</button></div></div></div></div></div>`;
-   wrap.appendChild(div);
-  });enableDrag(wrap,di);days.appendChild(card);
- });
-}
-function enableDrag(container,di){let dragged=null;container.querySelectorAll(".activity").forEach(el=>{el.addEventListener("dragstart",()=>dragged=+el.dataset.index);el.addEventListener("dragover",e=>e.preventDefault());el.addEventListener("drop",e=>{e.preventDefault();const target=+el.dataset.index;if(dragged===null||dragged===target)return;const [item]=itinerary[di].items.splice(dragged,1);itinerary[di].items.splice(target,0,item);persist();});});}
-function toggleDone(di,ai,v){itinerary[di].items[ai].done=v;persist();}
-function moveActivity(di,ai,dir){const ni=ai+dir;if(ni<0||ni>=itinerary[di].items.length)return;[itinerary[di].items[ai],itinerary[di].items[ni]]=[itinerary[di].items[ni],itinerary[di].items[ai]];persist();}
-function deleteActivity(di,ai){if(confirm("Delete this stop?")){itinerary[di].items.splice(ai,1);persist();}}
-function openEditActivity(di,ai){editDay.value=di;editAct.value=ai;const a=itinerary[di].items[ai];mTime.value=a.time;mTitle.value=a.title;mArea.value=a.area||"";mType.value=a.type||"Other";mDetail.value=a.detail||"";modalTitle.textContent="Edit stop";activityModal.classList.add("open");}
-function openAddActivity(di){editDay.value=di;editAct.value=-1;mTime.value="";mTitle.value="";mArea.value="";mType.value="Attraction";mDetail.value="";modalTitle.textContent="Add stop";activityModal.classList.add("open");}
-function saveActivity(){const di=+editDay.value,ai=+editAct.value;const obj={time:mTime.value.trim(),title:mTitle.value.trim(),area:mArea.value.trim(),type:mType.value,detail:mDetail.value.trim(),done:false};if(!obj.title)return alert("Enter a place name.");if(ai===-1)itinerary[di].items.push(obj);else{obj.done=itinerary[di].items[ai].done;itinerary[di].items[ai]=obj;}activityModal.classList.remove("open");persist();}
-function closeModal(){activityModal.classList.remove("open");}
-function editDay(di){const d=prompt("Day/date:",itinerary[di].date);if(d===null)return;const t=prompt("Day title:",itinerary[di].title);if(t===null)return;itinerary[di].date=d;itinerary[di].title=t;persist();}
-function openAddDay(){dayModal.classList.add("open");}function addDay(){if(!newDayDate.value.trim()||!newDayTitle.value.trim())return;itinerary.push({date:newDayDate.value.trim(),title:newDayTitle.value.trim(),items:[]});dayModal.classList.remove("open");newDayDate.value="";newDayTitle.value="";persist();}
-
-function openPlaceModal(type){pName.value="";pType.value=type||"Restaurant";pArea.value="";pHalal.value="Unknown";pPrice.value="";pNotes.value="";placeModal.classList.add("open");}
-function savePlace(){if(!pName.value.trim())return;placesData.push({name:pName.value.trim(),type:pType.value,area:pArea.value.trim(),halal:pHalal.value,price:pPrice.value.trim(),notes:pNotes.value.trim()});localStorage.setItem("v3_places",JSON.stringify(placesData));placeModal.classList.remove("open");renderPlaces();renderFood();}
-function deletePlace(i){if(confirm("Delete saved place?")){placesData.splice(i,1);localStorage.setItem("v3_places",JSON.stringify(placesData));renderPlaces();renderFood();}}
-function addPlaceToItinerary(i){const options=itinerary.map((d,idx)=>idx+": "+d.date+" — "+d.title).join("\n");const v=prompt("Choose day number:\n"+options);if(v===null)return;const di=parseInt(v);if(isNaN(di)||!itinerary[di])return alert("Invalid day.");const p=placesData[i];itinerary[di].items.push({time:"",title:p.name,area:p.area,type:p.type,detail:p.notes,done:false});persist();alert("Added to "+itinerary[di].date);}
-function renderPlaces(){placesList.innerHTML=placesData.map((p,i)=>`<div class="card placecard"><div><span class="pill">${p.type}</span><h3 style="margin-top:9px">${p.name}</h3><div class="tiny">📍 ${p.area||"Area not set"} · ${p.halal}</div><p>${p.notes||""}</p><div class="muted">${p.price||""}</div></div><div class="actions"><a class="btn small" target="_blank" href="${naverSearch(p.name,p.area)}">Map</a><button class="small secondary" onclick="addPlaceToItinerary(${i})">Add to trip</button><button class="small danger" onclick="deletePlace(${i})">Delete</button></div></div>`).join("");}
-function renderFood(){foodList.innerHTML=placesData.filter(p=>p.type==="Restaurant"||p.type==="Café").map(p=>`<div class="card"><span class="pill">${p.type}</span><h3 style="margin-top:9px">${p.name}</h3><div class="tiny">📍 ${p.area||"Area not set"} · ${p.halal}</div><p>${p.notes||""}</p><div class="actions"><a class="btn small" target="_blank" href="${naverSearch(p.name,p.area)}">Naver Map</a></div></div>`).join("");}
-
-function updateDashboard(){const dep=new Date("2026-11-27T19:30:00+08:00"),now=new Date();const ms=dep-now;countdown.textContent=ms>0?Math.ceil(ms/86400000)+" days":"Trip time!";let total=0,done=0,next=null;itinerary.forEach(d=>d.items.forEach(a=>{total++;if(a.done)done++;else if(!next)next={day:d.date,...a};}));const pct=total?Math.round(done/total*100):0;progressText.textContent=pct+"%";progressBar.style.width=pct+"%";nextDestination.innerHTML=next?`<span class="pill">${next.day}</span><h3 style="margin-top:9px">${next.time||""} ${next.title}</h3><div class="muted">${next.detail||""}</div><div class="actions" style="margin-top:10px"><a class="btn small" target="_blank" href="${naverSearch(next.title,next.area||"")}">Naver Map</a><button class="small secondary" onclick="showTab('mapsec');setTimeout(initMap,250)">Show on map</button></div>`:"Everything completed 🎉";}
-
-function addExpense(){const n=ename.value.trim(),a=parseFloat(eamount.value);if(!n||!a)return;expensesData.push({name:n,amount:a,currency:ecurrency.value,cat:ecat.value});localStorage.setItem("v3_expenses",JSON.stringify(expensesData));ename.value="";eamount.value="";renderExpenses();}
-function deleteExpense(i){expensesData.splice(i,1);localStorage.setItem("v3_expenses",JSON.stringify(expensesData));renderExpenses();}
-function renderExpenses(){expenses.innerHTML=expensesData.length?expensesData.map((e,i)=>`<div class="expense"><div><strong>${e.name}</strong><div class="tiny">${e.cat}</div></div><div style="text-align:right"><strong>${e.currency} ${e.amount.toFixed(2)}</strong><br><button class="small secondary" onclick="deleteExpense(${i})">Delete</button></div></div>`).join(""):'<div class="muted">No expenses yet.</div>';const t={KRW:0,SGD:0,MYR:0};expensesData.forEach(e=>t[e.currency]+=e.amount);krwTotal.textContent="₩"+Math.round(t.KRW).toLocaleString();sgdTotal.textContent="S$"+t.SGD.toFixed(2);myrTotal.textContent="RM"+t.MYR.toFixed(2);expenseCount.textContent=expensesData.length;}
-
-function renderChecklist(){checkItems.innerHTML=CHECKLIST.map((x,i)=>`<label class="checkline" style="padding:10px 0;border-top:${i?'1px solid var(--line)':'none'}"><input type="checkbox" ${checklistData[i]?"checked":""} onchange="checklistData[${i}]=this.checked;localStorage.setItem('v3_checklist',JSON.stringify(checklistData))"><span>${x}</span></label>`).join("");}
-function renderBookings(){bookingList.innerHTML=BOOKINGS.map(b=>`<div class="expense"><div><strong>${b[0]}</strong><div class="tiny">${b[2]}</div></div><span class="pill ${b[1]==='Booked'?'good':'warn'}">${b[1]}</span></div>`).join("");}
-
-function initMap(){if(map){setTimeout(()=>map.invalidateSize(),100);renderMapPins();return;}map=L.map("map").setView([37.5665,126.9780],12);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap contributors"}).addTo(map);renderMapPins();}
-function currentTripDayIndex(){const now=new Date();const key=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;const m={"2026-11-27":0,"2026-11-28":1,"2026-11-29":2,"2026-11-30":3,"2026-12-01":4,"2026-12-02":5,"2026-12-03":6,"2026-12-04":7};return m[key]??1;}
-function renderMapPins(){if(!map)return;pinLayers.forEach(l=>map.removeLayer(l));pinLayers=[];if(routeLayer){map.removeLayer(routeLayer);routeLayer=null;}const di=currentTripDayIndex();const coords=[];itinerary[di].items.forEach(a=>{if(a.lat&&a.lng){coords.push([a.lat,a.lng]);const marker=L.marker([a.lat,a.lng]).addTo(map).bindPopup(`<b>${a.time||""} ${a.title}</b><br>${a.detail||""}<br><a target="_blank" href="${naverSearch(a.title,a.area||"")}">Open Naver Map</a>`);pinLayers.push(marker);}});if(coords.length){routeLayer=L.polyline(coords,{weight:3,opacity:.55}).addTo(map);map.fitBounds(coords,{padding:[30,30]});}}
-function locateMe(){initMap();if(!navigator.geolocation)return alert("Location is not supported.");navigator.geolocation.getCurrentPosition(pos=>{const lat=pos.coords.latitude,lng=pos.coords.longitude;const icon=L.divIcon({html:'<div class="couple-marker">👫</div>',className:'',iconSize:[38,38],iconAnchor:[19,19]});if(userMarker)map.removeLayer(userMarker);userMarker=L.marker([lat,lng],{icon}).addTo(map).bindPopup("<b>Farhan & Biby are here ❤️</b>").openPopup();map.setView([lat,lng],15);},{enableHighAccuracy:true,timeout:10000});}
-
-function exportData(){const data={version:3,exported:new Date().toISOString(),itinerary,placesData,expensesData,checklistData};const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="seoul-trip-2026-v3-backup.json";a.click();URL.revokeObjectURL(a.href);}
-function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.itinerary)itinerary=d.itinerary;if(d.placesData)placesData=d.placesData;if(d.expensesData)expensesData=d.expensesData;if(d.checklistData)checklistData=d.checklistData;localStorage.setItem("v3_itinerary",JSON.stringify(itinerary));localStorage.setItem("v3_places",JSON.stringify(placesData));localStorage.setItem("v3_expenses",JSON.stringify(expensesData));localStorage.setItem("v3_checklist",JSON.stringify(checklistData));renderItinerary();renderPlaces();renderFood();renderExpenses();renderChecklist();updateDashboard();alert("Backup imported.");}catch(err){alert("Invalid backup file.");}};r.readAsText(f);}
-function resetItinerary(){if(confirm("Reset itinerary to original V3?")){itinerary=structuredClone(DEFAULT_ITINERARY);placesData=structuredClone(DEFAULT_PLACES);localStorage.setItem("v3_itinerary",JSON.stringify(itinerary));localStorage.setItem("v3_places",JSON.stringify(placesData));persist();renderPlaces();renderFood();}}
-
-renderItinerary();renderPlaces();renderFood();renderExpenses();renderChecklist();renderBookings();updateDashboard();
-if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js");
-</script>
-</body>
-</html>
+const DEFAULT=[
+["Fri, 27 Nov","Fly to Korea",[["19:30","Depart Singapore","Changi","Transport","Evening flight to Seoul."]]],
+["Sat, 28 Nov","Arrival + Myeongdong + Namsan",[["06:30","Incheon International Airport","Incheon","Transport","Immigration + Airport Limousine 6015."],["09:00","ibis Styles Ambassador Seoul Myeongdong","Myeongdong","Hotel","Drop luggage."],["10:00","Daiso Myeongdong Station Branch","Myeongdong","Shopping","12-storey branch."],["15:30","Namsan Cable Car","Namsan","Attraction","Walk from hotel."],["16:15","N Seoul Tower","Namsan","Attraction","Sunset + night view."]]],
+["Sun, 29 Nov","Palace + Bukchon + Insadong",[["08:30","Daehan Hanbok","Gyeongbokgung","Attraction","Traditional/Fusion rental."],["09:30","Gyeongbokgung Palace","Jongno","Attraction","Palace photos."],["13:00","IFTAR Gyeongbokgung","Jongno","Food","Lunch."],["14:00","Bukchon Hanok Village","Bukchon","Attraction","Walk + photos."],["15:30","Insadong-gil","Insadong","Shopping","Souvenirs."]]],
+["Mon, 30 Nov","Nami Island",[["09:00","Nami Island","Gapyeong","Attraction","Day tour."],["14:00","Garden of Morning Calm","Gapyeong","Attraction","If included."]]],
+["Tue, 1 Dec","Seongsu + Seoul Forest",[["10:30","Seongsu-dong","Seongsu","Shopping","Pop-ups, fashion, cafés."],["14:00","Seoul Forest","Seongsu","Attraction","Walk + photos."]]],
+["Wed, 2 Dec","Hongdae + Yeonnam",[["10:00","Hongdae","Hongdae","Shopping","Explore."],["12:00","Busanjib Hongdae","Hongdae","Food","Lunch."],["13:00","Gyeongui Line Forest Park","Yeonnam","Attraction","Walk."],["15:00","AK Plaza Hongdae","Hongdae","Shopping","Shopping."]]],
+["Thu, 3 Dec","COEX + Itaewon",[["10:00","Starfield Library COEX","Gangnam","Attraction","COEX."],["13:00","Itaewon","Itaewon","Attraction","Explore."],["14:00","Seoul Central Mosque","Itaewon","Attraction","Mosque."],["16:00","EID Halal Korean Food","Itaewon","Food","Dinner."]]],
+["Fri, 4 Dec","Last shopping + Airport",[["09:00","ibis Styles Ambassador Seoul Myeongdong","Myeongdong","Hotel","Checkout."],["12:00","BSJ Chicken","Myeongdong","Food","Lunch."],["13:00","Myeongdong Shopping Street","Myeongdong","Shopping","Last shopping."],["15:40","Airport Limousine 6015 Stop","Myeongdong","Transport","Airport transfer."]]]
+].map(d=>({date:d[0],title:d[1],items:d[2].map(x=>({time:x[0],title:x[1],area:x[2],type:x[3],detail:x[4],done:false}))}));
+const STARTPLACES=[["IFTAR Gyeongbokgung","Food","Jongno","Halal","Bulgogi · chicken · kimchi pancake"],["Kampungku Restaurant","Food","Myeongdong","Halal","Fried chicken · army stew"],["Busanjib Hongdae","Food","Hongdae","Halal","L.A. Galbi · Jjajangmyeon"],["EID Halal Korean Food","Food","Itaewon","Halal","Bulgogi · bibimbap"],["BSJ Chicken","Food","Myeongdong","Halal","Fried chicken"]].map(x=>({name:x[0],type:x[1],area:x[2],halal:x[3],note:x[4]}));
+let itinerary=JSON.parse(localStorage.getItem("v4_trip")||"null")||structuredClone(DEFAULT),places=JSON.parse(localStorage.getItem("v4_places")||"null")||structuredClone(STARTPLACES),exp=JSON.parse(localStorage.getItem("v4_exp")||"[]"),checks=JSON.parse(localStorage.getItem("v4_checks")||'{"me":[],"wife":[],"shared":[]}'),checkWho="me",filter="All",map,userMarker;
+function nav(n,a=""){return "https://map.naver.com/p/search/"+encodeURIComponent(n+" "+a+" Seoul")}
+function showTab(id){document.querySelectorAll("section").forEach(s=>s.classList.remove("show"));document.getElementById(id).classList.add("show");document.querySelectorAll(".bottom button").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));if(id==="map")setTimeout(initMap,200)}
+function save(){localStorage.setItem("v4_trip",JSON.stringify(itinerary));renderTrip();dashboard()}
+function renderTrip(){days.innerHTML=itinerary.map((d,di)=>`<div class="card"><span class="pill">${d.date}</span><h2>${d.title}</h2>${d.items.map((a,ai)=>`<div class="activity"><b>${a.time} · ${a.title}</b><div class="muted">${a.area} · ${a.detail}</div><div class="actions"><a class="btn" target="_blank" href="${nav(a.title,a.area)}">Naver Map</a><button class="secondary" onclick="move(${di},${ai},-1)">↑</button><button class="secondary" onclick="move(${di},${ai},1)">↓</button><button class="secondary" onclick="editStop(${di},${ai})">Edit</button><button class="red" onclick="delStop(${di},${ai})">Delete</button></div></div>`).join("")}</div>`).join("")}
+function move(d,i,x){let n=i+x;if(n<0||n>=itinerary[d].items.length)return;[itinerary[d].items[i],itinerary[d].items[n]]=[itinerary[d].items[n],itinerary[d].items[i]];save()}
+function editStop(d,i){let a=itinerary[d].items[i],t=prompt("Place name",a.title);if(t===null)return;let tm=prompt("Time",a.time);if(tm===null)return;a.title=t;a.time=tm;save()}
+function delStop(d,i){if(confirm("Delete stop?")){itinerary[d].items.splice(i,1);save()}}
+function addStop(){let ds=itinerary.map((d,i)=>`${i}: ${d.date}`).join("\n"),d=parseInt(prompt("Choose day number:\n"+ds));if(!itinerary[d])return;let n=prompt("Place name");if(!n)return;let t=prompt("Time","10:00")||"";let a=prompt("Area","Seoul")||"";itinerary[d].items.push({time:t,title:n,area:a,type:"Other",detail:"",done:false});save()}
+function dashboard(){let dep=new Date("2026-11-27T19:30:00+08:00"),ms=dep-new Date();countdown.textContent=ms>0?Math.ceil(ms/86400000)+" days":"Trip time!";let total=0,done=0,n=null;itinerary.forEach(d=>d.items.forEach(a=>{total++;if(a.done)done++;else if(!n)n={...a,date:d.date}}));let p=total?Math.round(done/total*100):0;progressText.textContent=p+"%";progressBar.style.width=p+"%";next.innerHTML=n?`<span class="pill">${n.date}</span><h2>${n.time} · ${n.title}</h2><p class="muted">${n.detail}</p><a class="btn" target="_blank" href="${nav(n.title,n.area)}">Naver Map</a>`:"All done 🎉"}
+function renderPlaces(){let cats=["All","Food","Café","Shopping","Attraction","Maybe"];filters.innerHTML=cats.map(c=>`<button class="${c===filter?'active':''}" onclick="filter='${c}';renderPlaces()">${c}</button>`).join("");let a=filter==="All"?places:places.filter(p=>p.type===filter);placeList.innerHTML=a.map(p=>{let i=places.indexOf(p);return `<div class="card place"><span class="pill">${p.type}</span><h2>${p.name}</h2><div class="tiny">📍 ${p.area} · ${p.halal}</div><p>${p.note||""}</p><div class="actions"><a class="btn" target="_blank" href="${nav(p.name,p.area)}">Naver Map</a><button class="secondary" onclick="placeToTrip(${i})">Add to Trip</button><button class="red" onclick="places.splice(${i},1);localStorage.setItem('v4_places',JSON.stringify(places));renderPlaces()">Delete</button></div></div>`}).join("")}
+function savePlace(){if(!pname.value)return;places.push({name:pname.value,type:ptype.value,area:parea.value,halal:phalal.value,note:pnote.value});localStorage.setItem("v4_places",JSON.stringify(places));placeModal.classList.remove("open");pname.value=parea.value=pnote.value="";renderPlaces()}
+function placeToTrip(i){let d=parseInt(prompt("Day number:\n"+itinerary.map((x,j)=>`${j}: ${x.date}`).join("\n")));if(!itinerary[d])return;let p=places[i];itinerary[d].items.push({time:"",title:p.name,area:p.area,type:p.type,detail:p.note,done:false});save()}
+function addExpense(){let a=parseFloat(eamt.value);if(!ename.value||!a)return;exp.push({n:ename.value,a,c:ecur.value,k:ecat.value});localStorage.setItem("v4_exp",JSON.stringify(exp));ename.value=eamt.value="";renderExp()}
+function renderExp(){let t={KRW:0,SGD:0,MYR:0};exp.forEach(e=>t[e.c]+=e.a);totals.innerHTML=`<b>₩${Math.round(t.KRW).toLocaleString()} · S$${t.SGD.toFixed(2)} · RM${t.MYR.toFixed(2)}</b>`;expenses.innerHTML=exp.map((e,i)=>`<div class="expense"><span>${e.n}<div class="tiny">${e.k}</div></span><span><b>${e.c} ${e.a}</b> <button onclick="exp.splice(${i},1);localStorage.setItem('v4_exp',JSON.stringify(exp));renderExp()">×</button></span></div>`).join("")}
+function showChecklist(w,b){checkWho=w;document.querySelectorAll("#more .tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderChecks()}
+function addCheck(){if(!newCheck.value.trim())return;checks[checkWho].push({text:newCheck.value.trim(),done:false});newCheck.value="";storeChecks()}
+function storeChecks(){localStorage.setItem("v4_checks",JSON.stringify(checks));renderChecks()}
+function renderChecks(){checkList.innerHTML=checks[checkWho].length?checks[checkWho].map((x,i)=>`<div class="checkrow"><input type="checkbox" ${x.done?"checked":""} onchange="checks['${checkWho}'][${i}].done=this.checked;storeChecks()" style="width:auto"> ${x.text} <button class="secondary" style="float:right" onclick="let v=prompt('Edit item',checks['${checkWho}'][${i}].text);if(v!==null){checks['${checkWho}'][${i}].text=v;storeChecks()}">Edit</button> <button class="red" style="float:right" onclick="checks['${checkWho}'].splice(${i},1);storeChecks()">×</button></div>`).join(""):'<p class="muted">Empty — add your own items.</p>'}
+function setFont(v){document.documentElement.style.setProperty("--fs",v);localStorage.setItem("v4_font",v)}
+function setTheme(v){localStorage.setItem("v4_theme",v);if(v==="dark"){document.documentElement.style.setProperty("--bg","#101827");document.documentElement.style.setProperty("--card","#172033");document.documentElement.style.setProperty("--text","#f8fafc");document.documentElement.style.setProperty("--muted","#b8c2d5")}else if(v==="minimal"){document.documentElement.style.setProperty("--bg","#f7f7f7");document.documentElement.style.setProperty("--card","#fff");document.documentElement.style.setProperty("--text","#202020");document.documentElement.style.setProperty("--blue","#333");document.documentElement.style.setProperty("--muted","#777")}else{location.reload()}}
+function initMap(){if(map){map.invalidateSize();return}map=L.map("mapbox").setView([37.5665,126.978],12);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"&copy; OpenStreetMap contributors"}).addTo(map)}
+function locateMe(){initMap();navigator.geolocation.getCurrentPosition(p=>{let ll=[p.coords.latitude,p.coords.longitude],ic=L.divIcon({html:'<div class="couple">👦</div>',className:""});if(userMarker)map.removeLayer(userMarker);userMarker=L.marker(ll,{icon:ic}).addTo(map).bindPopup("Me ❤️").openPopup();map.setView(ll,15);meStatus.textContent="Location active";},()=>alert("Please allow location access."),{enableHighAccuracy:true})}
+async function loadWeather(){weatherText.textContent="Loading Seoul weather…";try{let r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.9780&current=temperature_2m,apparent_temperature,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FSeoul&forecast_days=5");let d=await r.json(),icon=c=>c===0?"☀️":c<4?"⛅":c<50?"🌫️":c<70?"🌧️":c<80?"❄️":"🌦️";temp.textContent=Math.round(d.current.temperature_2m)+"°C";weatherText.textContent=`Feels ${Math.round(d.current.apparent_temperature)}°C · H ${Math.round(d.daily.temperature_2m_max[0])}° / L ${Math.round(d.daily.temperature_2m_min[0])}° · Rain ${d.daily.precipitation_probability_max[0]??0}%`;forecast.innerHTML=d.daily.time.map((x,i)=>`<div><b>${new Date(x+"T00:00:00").toLocaleDateString("en",{weekday:"short"})}</b><div style="font-size:1.5rem">${icon(d.daily.weather_code[i])}</div><b>${Math.round(d.daily.temperature_2m_max[i])}°</b><div class="tiny">${Math.round(d.daily.temperature_2m_min[i])}°</div></div>`).join("")}catch(e){weatherText.textContent="Weather unavailable. Check internet connection."}}
+let f=localStorage.getItem("v4_font");if(f){setFont(f);fontSetting.value=f}renderTrip();renderPlaces();renderExp();renderChecks();dashboard();loadWeather();
+</script></body></html>

@@ -1,31 +1,17 @@
-# Seoul Trip 2026 — V3
+# Seoul Trip 2026 V4
 
-## New in V3
-- Redesigned mobile UI
-- Timeline itinerary
-- Auto Naver Map search button for every itinerary stop
-- Saved Places database
-- Add restaurants, cafes, shops, attractions, and optional places
-- Add any saved place into an itinerary day
-- Live map using Leaflet + OpenStreetMap
-- Current GPS location with a cute couple marker
-- Daily destination pins and route line
-- One-tap handoff to Naver Map
-- Booking wallet
-- Existing budget, checklist, backup/import, and offline shell
+## Changes
+- Korea flag-inspired blue/white/red UI
+- Cute live Seoul weather card with 5-day forecast
+- Food merged into Places
+- Quick Access, Info and Bookings removed
+- Empty editable Mine / Wife / Shared checklists
+- Font-size and theme settings
+- Cleaner bottom navigation
+- Current-user GPS map
+- Cloud/couple-sync UI prepared
 
-## Update GitHub Pages
-Replace/upload these files in the repository root:
-- index.html
-- manifest.webmanifest
-- sw.js
-- icon-192.png
-- icon-512.png
-- README.md
+## Important about couple sync
+This ZIP does NOT silently create a cloud account or database. Wife sync and live wife-location need a shared backend (Firebase/Supabase) configured with your own project credentials. Until that is connected, data remains local on each device and only your own current GPS marker works.
 
-Commit to main. GitHub Pages redeploys automatically.
-
-## Important
-Live map tiles and Naver Map links require internet.
-Current GPS is handled by the browser on-device.
-Saved itinerary edits remain local unless you export a backup.
+Upload all six files to the same GitHub repository and commit to main.
