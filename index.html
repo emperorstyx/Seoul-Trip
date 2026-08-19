@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2456aa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Our Trips">
-<title>Our Trips V6</title>
+<title>Our Trips V6.1</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -73,6 +73,12 @@ input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);borde
 <section id="trips" class="show">
 <div class="triphead"><div><span class="pill">CLOUD COUPLE TRAVEL</span><h1>Our Trips</h1><p class="muted">Create a trip or join your partner with a code.</p></div><button class="primary" onclick="tripModal.classList.add('open')">+ New Trip</button></div>
 <div class="card"><h3>Join partner's trip</h3><div class="row"><input id="joinCode" placeholder="8-character trip code"><input id="joinName" placeholder="Your display name"></div><button class="secondary" onclick="joinTrip()">Join Trip</button></div>
+<div id="seoulImportCard" class="card">
+<h2>🇰🇷 Seoul 2026</h2>
+<p class="muted">Bring the Korea itinerary from the earlier local version into Supabase Cloud. This only creates it once.</p>
+<button id="seoulImportBtn" class="primary" onclick="importSeoul2026()">Import Seoul 2026 to Cloud</button>
+<div id="seoulImportMsg" class="tiny" style="margin-top:8px"></div>
+</div>
 <div id="tripList"></div>
 </section>
 
@@ -141,7 +147,86 @@ async function enterApp(u){user=u;authShell.classList.add('hidden');appShell.cla
 function showTab(id){document.querySelectorAll('#appShell section').forEach(s=>s.classList.remove('show'));document.getElementById(id).classList.add('show');bottomNav.classList.toggle('hidden',id==='trips');document.querySelectorAll('#bottomNav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));if(id==='map')setTimeout(()=>renderMap(),120);if(id==='home')loadWeather()}
 async function loadTrips(){let {data,error}=await sb.from('trips').select('*').order('start_date',{ascending:true});if(error){alert(error.message);return}trips=data||[];renderTrips()}
 function flag(c=''){c=c.toLowerCase();return c.includes('korea')?'🇰🇷':c.includes('japan')?'🇯🇵':c.includes('malaysia')?'🇲🇾':c.includes('singapore')?'🇸🇬':c.includes('indonesia')?'🇮🇩':'🌍'}
-function renderTrips(){tripList.innerHTML=trips.length?trips.map(t=>`<div class="card"><div class="triphead"><div class="grow"><div style="font-size:2rem">${flag(t.country)}</div><h2>${t.name}</h2><div class="muted">${t.city||''}, ${t.country||''}</div><div class="tiny">${t.start_date||''} → ${t.end_date||''}</div></div><span class="pill">Code ${t.join_code}</span></div><div class="actions" style="margin-top:10px"><button class="primary" onclick="openCloudTrip('${t.id}')">Open Trip</button><button class="secondary" onclick="navigator.clipboard.writeText('${t.join_code}').then(()=>alert('Trip code copied'))">Copy Code</button></div></div>`).join(''):'<div class="card"><p class="muted">No cloud trips yet. Create one, or join your partner with a code.</p></div>'}
+function renderTrips(){let ic=document.getElementById('seoulImportCard');if(ic)ic.classList.toggle('hidden',trips.some(t=>t.name==='Seoul 2026'));tripList.innerHTML=trips.length?trips.map(t=>`<div class="card"><div class="triphead"><div class="grow"><div style="font-size:2rem">${flag(t.country)}</div><h2>${t.name}</h2><div class="muted">${t.city||''}, ${t.country||''}</div><div class="tiny">${t.start_date||''} → ${t.end_date||''}</div></div><span class="pill">Code ${t.join_code}</span></div><div class="actions" style="margin-top:10px"><button class="primary" onclick="openCloudTrip('${t.id}')">Open Trip</button><button class="secondary" onclick="navigator.clipboard.writeText('${t.join_code}').then(()=>alert('Trip code copied'))">Copy Code</button></div></div>`).join(''):'<div class="card"><p class="muted">No cloud trips yet. Create one, or join your partner with a code.</p></div>'}
+
+const SEOUL_IMPORT_DAYS=[
+["2026-11-27","Fly to Korea",[["19:30","Depart Singapore","Changi"]]],
+["2026-11-28","Arrival + Myeongdong + Namsan",[["06:30","Incheon International Airport","Incheon"],["09:00","ibis Styles Ambassador Seoul Myeongdong","Myeongdong"],["10:00","Daiso Myeongdong Station Branch","Myeongdong"],["15:30","Namsan Cable Car","Namsan"],["16:15","N Seoul Tower","Namsan"]]],
+["2026-11-29","Palace + Bukchon + Insadong",[["08:30","Daehan Hanbok","Gyeongbokgung"],["09:30","Gyeongbokgung Palace","Jongno"],["13:00","IFTAR Gyeongbokgung","Jongno"],["14:00","Bukchon Hanok Village","Bukchon"],["15:30","Insadong-gil","Insadong"]]],
+["2026-11-30","Nami Island + Garden of Morning Calm",[["09:00","Nami Island","Gapyeong"],["14:00","Garden of Morning Calm","Gapyeong"]]],
+["2026-12-01","Seongsu",[["10:30","Seongsu-dong","Seongsu"],["14:00","Seoul Forest","Seongsu"]]],
+["2026-12-02","Hongdae + Yeonnam",[["10:00","Hongdae","Hongdae"],["12:00","Busanjib Hongdae","Hongdae"],["13:00","Gyeongui Line Forest Park","Yeonnam"],["15:00","AK Plaza Hongdae","Hongdae"]]],
+["2026-12-03","COEX + Itaewon",[["10:00","Starfield Library COEX","Gangnam"],["13:00","Itaewon","Itaewon"],["14:00","Seoul Central Mosque","Itaewon"],["16:00","EID Halal Korean Food","Itaewon"]]],
+["2026-12-04","Last day",[["12:00","BSJ Chicken","Myeongdong"],["13:00","Myeongdong Shopping Street","Myeongdong"],["15:40","Airport Limousine 6015 Stop","Myeongdong"]]]
+];
+const SEOUL_IMPORT_PLACES=[
+["IFTAR Gyeongbokgung","Food","Jongno","Halal","Bulgogi · chicken · kimchi pancake"],
+["Kampungku Restaurant","Food","Myeongdong","Halal","Korean halal food"],
+["Busanjib Hongdae","Food","Hongdae","Halal","L.A. Galbi · Jjajangmyeon"],
+["EID Halal Korean Food","Food","Itaewon","Halal","Bulgogi · bibimbap"],
+["BSJ Chicken","Food","Myeongdong","Halal","Fried chicken"],
+["Daehan Hanbok","Attraction","Gyeongbokgung","Not applicable","Hanbok rental"],
+["Gyeongbokgung Palace","Attraction","Jongno","Not applicable","Palace visit"],
+["Bukchon Hanok Village","Attraction","Bukchon","Not applicable","Hanok village"],
+["Insadong-gil","Shopping","Insadong","Not applicable","Shopping and walking"],
+["Nami Island","Attraction","Gapyeong","Not applicable","Day trip"],
+["Garden of Morning Calm","Attraction","Gapyeong","Not applicable","Day trip"],
+["Seongsu-dong","Shopping","Seongsu","Not applicable","Seongsu day"],
+["Seoul Forest","Attraction","Seongsu","Not applicable","Park"],
+["Hongdae","Shopping","Hongdae","Not applicable","Hongdae day"],
+["Gyeongui Line Forest Park","Attraction","Yeonnam","Not applicable","Yeonnam walk"],
+["AK Plaza Hongdae","Shopping","Hongdae","Not applicable","Shopping"],
+["Starfield Library COEX","Attraction","Gangnam","Not applicable","COEX"],
+["Seoul Central Mosque","Attraction","Itaewon","Not applicable","Itaewon"],
+["N Seoul Tower","Attraction","Namsan","Not applicable","Sunset / city view"],
+["Daiso Myeongdong Station Branch","Shopping","Myeongdong","Not applicable","Myeongdong Daiso"]
+];
+
+async function importSeoul2026(){
+  let btn=document.getElementById('seoulImportBtn'),out=document.getElementById('seoulImportMsg');
+  btn.disabled=true; out.textContent='Checking cloud…';
+  try{
+    let {data:existing,error:checkErr}=await sb.from('trips').select('*').eq('name','Seoul 2026').eq('created_by',user.id).limit(1);
+    if(checkErr) throw checkErr;
+    let trip=existing?.[0];
+    if(!trip){
+      out.textContent='Creating Seoul cloud trip…';
+      let {data,error}=await sb.from('trips').insert({
+        name:'Seoul 2026',country:'South Korea',city:'Seoul',currency:'KRW',
+        start_date:'2026-11-27',end_date:'2026-12-04',created_by:user.id
+      }).select().single();
+      if(error) throw error;
+      trip=data;
+    }
+    let {count:ic,error:ice}=await sb.from('itinerary').select('*',{count:'exact',head:true}).eq('trip_id',trip.id);
+    if(ice) throw ice;
+    if(!ic){
+      out.textContent='Uploading itinerary…';
+      let rows=[];
+      SEOUL_IMPORT_DAYS.forEach(d=>d[2].forEach((a,i)=>rows.push({
+        trip_id:trip.id,day_date:d[0],day_title:d[1],activity_time:a[0],
+        title:a[1],area:a[2],sort_order:i
+      })));
+      let {error}=await sb.from('itinerary').insert(rows); if(error) throw error;
+    }
+    let {count:pc,error:pce}=await sb.from('places').select('*',{count:'exact',head:true}).eq('trip_id',trip.id);
+    if(pce) throw pce;
+    if(!pc){
+      out.textContent='Uploading saved places…';
+      let rows=SEOUL_IMPORT_PLACES.map(x=>({
+        trip_id:trip.id,name:x[0],category:x[1],area:x[2],halal_status:x[3],notes:x[4]
+      }));
+      let {error}=await sb.from('places').insert(rows); if(error) throw error;
+    }
+    out.textContent='✅ Seoul 2026 is now in Supabase Cloud.';
+    await loadTrips();
+    await openCloudTrip(trip.id);
+  }catch(e){
+    out.textContent='Import failed: '+e.message;
+    btn.disabled=false;
+  }
+}
+
 async function createCloudTrip(){if(!tname.value||!tcountry.value||!tcity.value||!tstart.value||!tend.value)return alert('Fill trip name, country, city and dates.');let payload={name:tname.value,country:tcountry.value,city:tcity.value,currency:tcurrency.value||'MYR',start_date:tstart.value,end_date:tend.value,created_by:user.id};let {data,error}=await sb.from('trips').insert(payload).select().single();if(error)return alert(error.message);tripModal.classList.remove('open');await loadTrips();await openCloudTrip(data.id)}
 async function joinTrip(){let code=joinCode.value.trim(),name=joinName.value.trim()||user.user_metadata?.display_name||user.email.split('@')[0];if(!code)return;let {data,error}=await sb.rpc('join_trip_by_code',{p_code:code,p_display_name:name});if(error)return alert(error.message);joinCode.value='';await loadTrips();await openCloudTrip(data)}
 async function openCloudTrip(id){activeTrip=trips.find(t=>t.id===id)||null;if(!activeTrip){await loadTrips();activeTrip=trips.find(t=>t.id===id)}if(!activeTrip)return;tripLabel.textContent=activeTrip.name;await loadCloudData();subscribeRealtime();renderAll();showTab('home')}

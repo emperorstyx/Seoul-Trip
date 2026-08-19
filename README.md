@@ -1,26 +1,12 @@
-# Our Trips V6 — Cloud Sync
+# Our Trips V6.1 — Seoul Cloud Migration
 
-V6 connects the GitHub Pages PWA to Supabase.
+Adds a one-time **Import Seoul 2026 to Cloud** button.
 
-Included:
-- Email/password signup and sign-in
-- Cloud trips
-- Private trip membership with join code
-- Realtime itinerary, places, spending and checklists
-- Mine / Partner / Shared checklists
-- Realtime latest couple locations on the map
-- Explicit location-sharing toggle
-- MYR consolidated spending with Frankfurter FX lookup
-- Softer animated weather
-- Existing blue/white/red UI and couple icon
+After login:
+1. Open All Trips.
+2. Tap Import Seoul 2026 to Cloud.
+3. The app creates the Seoul 2026 trip, uploads the built-in itinerary and saved Places to Supabase, then opens it.
+4. It will not duplicate itinerary/Places if the cloud trip already contains them.
+5. Once Seoul 2026 exists in your cloud account, the import card hides.
 
-IMPORTANT SETUP
-1. In Supabase SQL Editor, run `V6_SUPABASE_PATCH.sql` once.
-2. Upload the web files to your GitHub Pages repository.
-3. Open the app and create your account.
-4. Create a cloud trip.
-5. Wife creates her own account on her phone and joins using the trip code.
-
-The publishable Supabase key is intentionally client-side. Security depends on the Row Level Security policies you already created plus the V6 SQL patch. Never put a Supabase secret/service-role key in this repository.
-
-Location sharing updates while the PWA is active. iOS can suspend browser/PWA background location updates when the app is not active.
+V6 cloud sync, couple join code, realtime data, location sharing, weather and MYR expense conversion remain included.
