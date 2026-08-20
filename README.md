@@ -1,14 +1,12 @@
-# Our Trips V6.7.1 — Layout Hotfix
+# Our Trips V6.7.2 — Trip Creation + Mobile UI Hotfix
 
-Fixes the V6.7 HTML nesting bug that caused the Settings/More content to appear below every tab.
+Fixes based on phone screenshots:
+- Empty/new trips now show every trip date as a day card with `+ Activity`.
+- Edit Trip uses an in-app modal instead of the browser prompt.
+- Edit Trip destination supports autocomplete.
+- Places header uses a compact aligned `+ Add Place` button.
+- Place category chips are consistent and horizontally scroll on mobile.
+- Theme switching is visual only and must not change cloud/place data.
+- Service worker cache bumped to V6.7.2.
 
-Changes:
-- Rebuilt the More section with valid HTML structure.
-- Settings now stays only inside the More tab.
-- Checklist remains its own tab.
-- Trip map remains on Home.
-- Removed duplicate Cloud/Account elements.
-- Service-worker cache bumped to V6.7.1.
-- No new Supabase SQL is required beyond the V6.7 profile patch.
-
-Deploy the usual PWA files. If V6.7 is cached, open once with `?v=671`.
+No new Supabase SQL is required.
