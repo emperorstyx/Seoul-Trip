@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2456aa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Our Trips">
-<title>Our Trips V6.7</title>
+<title>Our Trips V6.7.1</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -200,30 +200,43 @@ body.theme-forest{--p:#26734d;--ps:#eef9f3}
 <section id="checklists"><h2>✅ Checklist</h2><div class="card"><h2>✅ Checklists</h2><div class="tabs"><button class="active" onclick="pickChecklist('mine',this)">👦 Mine</button><button onclick="pickChecklist('partner',this)">👧 Partner</button><button onclick="pickChecklist('shared',this)">🤝 Shared</button></div><div id="checkAddRow" class="row"><input id="newCheck" placeholder="Add item"><button class="primary" onclick="addCloudCheck()">Add</button></div><div id="checkList"></div></div>
 </section>
 <section id="more"><h2>☰ More</h2>
+
 <div class="card"><h2>🏠 Homepage Features</h2>
 <div class="settingRow"><div><b>Today's Progress</b><div class="tiny">Optional progress card on Home.</div></div><button id="progressToggle" class="miniToggle" onclick="toggleSetting('showProgress')"></button></div>
 <div class="settingRow"><div><b>Leave Reminder</b><div class="tiny">Warn when the next activity is getting close.</div></div><button id="travelToggle" class="miniToggle" onclick="toggleSetting('travelWarning')"></button></div>
 <div class="settingRow"><div><b>Reminder buffer</b><div class="tiny">Minutes before an activity.</div></div><select id="bufferSelect" style="width:115px" onchange="setBuffer(this.value)"><option>15</option><option selected>30</option><option>45</option><option>60</option></select></div>
 </div>
+
 <div class="card"><h2>🆘 Travel Documents & Emergency</h2>
-<div class="row"><input id="emLabel" placeholder="Label e.g. Emergency contact"><input id="emValue" placeholder="Information / phone / reference"></div><button class="secondary" onclick="addEmergencyInfo()">+ Add information</button><div id="emergencyList" style="margin-top:8px"></div>
+<div class="row"><input id="emLabel" placeholder="Label e.g. Emergency contact"><input id="emValue" placeholder="Information / phone / reference"></div>
+<button class="secondary" onclick="addEmergencyInfo()">+ Add information</button>
+<div id="emergencyList" style="margin-top:8px"></div>
 <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
-<input id="docFile" type="file" accept=".pdf,image/*" style="margin-bottom:8px"><button class="primary" onclick="uploadTripDocument()">Upload booking / document</button><div id="documentList" style="margin-top:8px"></div>
+<input id="docFile" type="file" accept=".pdf,image/*" style="margin-bottom:8px">
+<button class="primary" onclick="uploadTripDocument()">Upload booking / document</button>
+<div id="documentList" style="margin-top:8px"></div>
 </div>
-<p class="tiny" id="accountInfo"></p><button class="secondary" onclick="refreshCloud()">Refresh Cloud</button></div>
-<div class="card"><h2>👥 Trip Members</h2><div id="memberList"></div><div class="tiny">Share the trip code from the All Trips screen with anyone you want to join this trip.</div></div>
+
+<div class="card"><h2>👥 Trip Members</h2>
+<div id="memberList"></div>
+<div class="tiny">Share the trip code from the All Trips screen with anyone you want to join this trip.</div>
+</div>
+
 <div class="card"><h2>🎨 Personalise</h2>
 <div class="settingRow"><div><b>My profile</b><div class="tiny">Display name and profile picture.</div></div><button class="secondary" onclick="openProfile()">Edit</button></div>
 <div class="settingRow"><div><b>Appearance</b></div><select id="appearanceSelect" onchange="setAppearance(this.value)"><option value="light">☀️ Light</option><option value="dark">🌙 Dark</option></select></div>
 <div class="settingRow"><div><b>Color theme</b></div><select id="themeSelect" onchange="setTheme(this.value)"><option value="korea">🇰🇷 Korea Blue</option><option value="sakura">🌸 Sakura</option><option value="forest">🌿 Forest</option></select></div>
 <div class="settingRow"><div><b>Text size</b></div><select id="fontSize" onchange="setFont(this.value)"><option value="14px">Small</option><option value="16px" selected>Normal</option><option value="18px">Large</option><option value="20px">Extra large</option></select></div>
 </div>
-<div class="tiny">Cloud: Connected · Database compatibility checked at login.</div></div>
-<div class="card"><h2>☁️ App & Cloud</h2><div class="cloudAbout">
+
+<div class="card"><h2>☁️ App & Cloud</h2>
+<div class="cloudAbout">
 <div><b>Cloud Sync</b><div class="tiny" id="accountInfo"></div><div style="margin-top:8px"><span class="syncDot ok"></span> Supabase connected</div><button class="secondary" style="margin-top:8px" onclick="refreshCloud()">Refresh Cloud</button></div>
-<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.7</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
-</div></div>
-<button class="secondary" onclick="showTab('trips')">← All Trips</button> <button class="danger" onclick="signOut()">Sign Out</button>
+<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.7.1</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
+</div>
+</div>
+
+<div class="actions"><button class="secondary" onclick="showTab('trips')">← All Trips</button><button class="danger" onclick="signOut()">Sign Out</button></div>
 </section>
 </main>
 
@@ -271,7 +284,7 @@ body.theme-forest{--p:#26734d;--ps:#eef9f3}
 const SUPABASE_URL='https://pbyfokktzpoufsiedqxj.supabase.co';
 const SUPABASE_KEY='sb_publishable_RPb5sSnVAtPJIWCp1KBZEA_XWv8V-Or';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const APP_VERSION='6.7';
+const APP_VERSION='6.7.1';
 let authMode='signin',user=null,trips=[],activeTrip=null,
 cloud={itinerary:[],places:[],expenses:[],checks:[],members:[],locations:[],emergency:[],documents:[]},
 filter='All',checkView='mine',realtime=null,map,mapMarkers=[],locationWatch=null,fx={MYR:1},fxDate='',

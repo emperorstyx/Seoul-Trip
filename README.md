@@ -1,19 +1,14 @@
-# Our Trips V6.7
+# Our Trips V6.7.1 — Layout Hotfix
+
+Fixes the V6.7 HTML nesting bug that caused the Settings/More content to appear below every tab.
 
 Changes:
-- Malaysia trips show only one clock.
-- New-trip destination search + auto currency/timezone.
-- Profile photo has a square crop/resize frame.
-- Profile photo can be removed.
-- "Couple" renamed to "Trip Members".
-- Checklist moved to its own bottom tab.
-- Trip map moved to the bottom of Home.
-- Cloud Sync + About combined into one settings card.
-- Place search/autocomplete added when adding Places.
-- Weather now geocodes any trip city before loading forecast.
-- Map markers use member profile pictures when available.
-- Immediate UI removal after checklist/document deletion.
-- Light/Dark + color theme options included.
+- Rebuilt the More section with valid HTML structure.
+- Settings now stays only inside the More tab.
+- Checklist remains its own tab.
+- Trip map remains on Home.
+- Removed duplicate Cloud/Account elements.
+- Service-worker cache bumped to V6.7.1.
+- No new Supabase SQL is required beyond the V6.7 profile patch.
 
-Run `V6.7_SUPABASE_PATCH.sql` once before using profile pictures.
-Do not upload SQL files publicly to GitHub.
+Deploy the usual PWA files. If V6.7 is cached, open once with `?v=671`.
