@@ -1,15 +1,28 @@
-# Our Trips V6.2 — Stable Couple Build
+# Our Trips V6.3 — Travel Companion Release
 
-V6.2 keeps the working V6.1 Supabase cloud trip and Seoul import, and fixes the PWA update/cache problem.
+## New
+- Edit/delete cloud trips
+- Expense delete fix + Paid by Shared/member
+- Activities auto-sort by time
+- Tick Done → silver and moves below unfinished items
+- Undo completed activity
+- Shared activity notes
+- Today / All Days switch
+- Simple NOW / NEXT Home line
+- Destination local time + Malaysia time
+- Optional Today's Progress (OFF by default)
+- Optional Leave Reminder (OFF by default)
+- Offline indicator
+- Post-trip summary
+- Travel Documents & Emergency
+- Private PDF/image uploads via Supabase Storage
+- Version compatibility checking
+- Existing realtime sync and couple live-location remain
 
-## What changed
-- Network-first loading for app HTML, so GitHub Pages updates should no longer stay stuck on an old screen.
-- Old app caches are removed automatically when V6.2 activates.
-- Service-worker update checks bypass the HTTP cache.
-- In-app “Update now” notice when a newer service worker is ready.
-- Existing Supabase cloud sync, couple trip codes, realtime itinerary/Places/expenses/checklists, location sharing, weather, map and MYR conversion are retained.
+## Required
+Run `V6.3_SUPABASE_PATCH.sql` once in Supabase SQL Editor.
 
-## Deploy
+## Deploy to GitHub Pages
 Upload/replace:
 - index.html
 - sw.js
@@ -18,6 +31,6 @@ Upload/replace:
 - icon-512.png
 - README.md
 
-You do NOT need to run V6_SUPABASE_PATCH.sql again if V6/V6.1 SQL already succeeded.
+Do not upload the SQL patch to GitHub.
 
-For this one upgrade from V6.1 to V6.2, open the GitHub Pages site once with `?v=62` if the installed/browser app is still showing the old cached version. After V6.2 takes control, future releases should update normally.
+After deployment, open once with `?v=63` if a phone still has an older cached build.
