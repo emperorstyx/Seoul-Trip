@@ -1,15 +1,13 @@
-# Our Trips V6.3.1 — Login Hotfix
+# Our Trips V6.3.2 — Itinerary Alignment Hotfix
 
-This is a code-only stabilization release for V6.3.
+Fixes the itinerary layout inside the actual PWA:
+- checkbox no longer overlaps the time/title
+- consistent alignment for time, title, area and notes
+- completed items retain the same alignment while turning silver
+- Map / Undo / Edit / Delete controls are more compact on phone
+- based on the working V6.3.1 login hotfix
 
-Fixed:
-- Sign In button doing nothing
-- Create Account button doing nothing
-- Broken open-trip JavaScript
-- Broken itinerary grouping JavaScript
-- Broken expense-delete JavaScript
-
-The V6.3 Supabase database/storage patch is unchanged. If you already ran `V6.3_SUPABASE_PATCH.sql` successfully, DO NOT run another SQL patch for V6.3.1.
+No new Supabase SQL is required.
 
 Deploy/replace:
 - index.html
@@ -19,4 +17,4 @@ Deploy/replace:
 - icon-512.png
 - README.md
 
-After deployment, open once with `?v=631` if a phone/browser still shows the broken cached V6.3 build.
+After GitHub deploys, open once with `?v=632` if an older cached build still appears.
