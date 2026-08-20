@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2456aa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Our Trips">
-<title>Our Trips V6.4</title>
+<title>Our Trips V6.5</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -79,7 +79,50 @@ background:#fff;border:1px solid #d8e4f5;border-radius:16px;box-shadow:0 12px 30
 .versionBlock{position:fixed;inset:0;z-index:9000;background:rgba(246,249,255,.98);display:none;place-items:center;padding:20px}
 .versionBlock.show{display:grid}.versionBlock .card{max-width:480px;text-align:center}
 
-.dayHead{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:2px}.dayHead h2{margin:7px 0 0}@media(max-width:560px){.dayHead{align-items:flex-start}.dayHead .primary{white-space:nowrap;padding:8px 10px}}</style>
+.dayHead{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:2px}.dayHead h2{margin:7px 0 0}@media(max-width:560px){.dayHead{align-items:flex-start}.dayHead .primary{white-space:nowrap;padding:8px 10px}}
+/* V6.5 itinerary alignment */
+.activity{
+  display:grid !important;
+  grid-template-columns:24px minmax(0,1fr);
+  column-gap:10px;
+  position:relative;
+  padding:12px 0 !important;
+  align-items:start;
+}
+.activityCheck{
+  position:static !important;
+  grid-column:1;
+  grid-row:1 / span 4;
+  width:18px !important;
+  height:18px !important;
+  margin:2px 0 0 0 !important;
+  accent-color:var(--p);
+}
+.activity>b,.activity>.muted,.activity>.tiny,.activity>.actions{
+  grid-column:2;
+  min-width:0;
+}
+.activity>b{line-height:1.35;margin:0 0 3px}
+.activity>.muted,.activity>.tiny{margin-top:1px}
+.activity>.actions{margin-top:9px !important;display:flex;gap:6px;flex-wrap:wrap}
+.activity>.actions .btn,.activity>.actions button{padding:7px 10px;border-radius:10px}
+.doneActivity{
+  background:#f3f4f6;
+  border-radius:14px;
+  padding:12px 10px !important;
+  margin:4px 0;
+  color:#8b95a6;
+}
+.doneActivity b,.doneActivity>.muted,.doneActivity>.tiny{
+  text-decoration:line-through;
+  color:#9aa3b2;
+}
+@media(max-width:560px){
+  .activity{grid-template-columns:22px minmax(0,1fr);column-gap:8px}
+  .activity>.actions .btn,.activity>.actions button{padding:7px 9px}
+}
+
+</style>
 </head>
 <body>
 <div id="authShell">
@@ -151,7 +194,7 @@ background:#fff;border:1px solid #d8e4f5;border-radius:16px;box-shadow:0 12px 30
 <div class="card"><h2>☁️ Cloud Sync</h2><div><span class="syncDot ok"></span><b>Supabase connected</b></div><p class="tiny" id="accountInfo"></p><button class="secondary" onclick="refreshCloud()">Refresh Cloud</button></div>
 <div class="card"><h2>👥 Couple</h2><div id="memberList"></div><div class="tiny">Share the trip code from the All Trips screen with your wife after she creates her account.</div></div>
 <div class="card"><h2>⚙️ Appearance</h2><select id="fontSize" onchange="setFont(this.value)"><option value="14px">Small</option><option value="16px" selected>Normal</option><option value="18px">Large</option><option value="20px">Extra large</option></select></div>
-<div class="card"><h2>ℹ️ About</h2><div><b>Our Trips</b> · Version <span id="aboutVersion">6.4</span></div><div class="tiny">Cloud: Connected · Database compatibility checked at login.</div></div>
+<div class="card"><h2>ℹ️ About</h2><div><b>Our Trips</b> · Version <span id="aboutVersion">6.5</span></div><div class="tiny">Cloud: Connected · Database compatibility checked at login.</div></div>
 <button class="secondary" onclick="showTab('trips')">← All Trips</button> <button class="danger" onclick="signOut()">Sign Out</button>
 </section>
 </main>
@@ -174,7 +217,7 @@ background:#fff;border:1px solid #d8e4f5;border-radius:16px;box-shadow:0 12px 30
 </div></div>
 
 <div id="placeModal" class="modalbg"><div class="modal"><h2>Add Place</h2>
-<div class="row"><input id="pname" placeholder="Place name"><select id="ptype"><option>Food</option><option>Café</option><option>Shopping</option><option>Attraction</option></select></div>
+<div class="row"><input id="pname" placeholder="Place name"><select id="ptype"><option>Restaurant</option><option>Shopping</option><option>Attraction</option></select></div>
 <div class="row"><input id="parea" placeholder="Area"><select id="phalal"><option>Halal</option><option>Muslim-friendly</option><option>Check ingredients</option><option>Unknown</option><option>Not applicable</option></select></div>
 <textarea id="pnote" placeholder="Notes / must try"></textarea>
 <div class="actions"><button class="primary" onclick="saveCloudPlace()">Save</button><button class="secondary" onclick="placeModal.classList.remove('open')">Cancel</button></div>
@@ -195,7 +238,7 @@ background:#fff;border:1px solid #d8e4f5;border-radius:16px;box-shadow:0 12px 30
 const SUPABASE_URL='https://pbyfokktzpoufsiedqxj.supabase.co';
 const SUPABASE_KEY='sb_publishable_RPb5sSnVAtPJIWCp1KBZEA_XWv8V-Or';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const APP_VERSION='6.4';
+const APP_VERSION='6.5';
 let authMode='signin',user=null,trips=[],activeTrip=null,
 cloud={itinerary:[],places:[],expenses:[],checks:[],members:[],locations:[],emergency:[],documents:[]},
 filter='All',checkView='mine',realtime=null,map,mapMarkers=[],locationWatch=null,fx={MYR:1},fxDate='',
@@ -317,7 +360,11 @@ function setTripView(v){tripView=v;renderItinerary()}
 async function addCloudStop(){let date=prompt('Date (YYYY-MM-DD)',activeTrip.start_date);if(!date)return;let dayTitle=prompt('Day title','Day plan')||'Day plan',title=prompt('Place / activity');if(!title)return;let time=prompt('Time (HH:MM)','10:00')||null,area=prompt('Area',activeTrip.city)||'',notes=prompt('Notes (optional)','')||'',same=cloud.itinerary.filter(x=>x.day_date===date),sort=same.length?Math.max(...same.map(x=>x.sort_order||0))+1:0;let {error}=await sb.from('itinerary').insert({trip_id:activeTrip.id,day_date:date,day_title:dayTitle,activity_time:time,title,area,notes,completed:false,sort_order:sort});if(error)alert(error.message)}
 async function editCloudStop(id){let a=cloud.itinerary.find(x=>x.id===id);if(!a)return;let title=prompt('Place / activity',a.title);if(title===null)return;let time=prompt('Time',String(a.activity_time||'').slice(0,5));if(time===null)return;let area=prompt('Area',a.area||'');if(area===null)return;let notes=prompt('Notes',a.notes||'');if(notes===null)return;let {error}=await sb.from('itinerary').update({title,activity_time:time||null,area,notes}).eq('id',id);if(error)alert(error.message)}
 async function deleteCloudStop(id){if(confirm('Delete this stop?')){let {error}=await sb.from('itinerary').delete().eq('id',id);if(error)alert(error.message)}}
-function renderPlaces(){let cats=['All','Food','Café','Shopping','Attraction','Camping','Hotel','Other'];filters.innerHTML=cats.map(c=>`<button class="${c===filter?'active':''}" onclick="filter='${c}';renderPlaces()">${c}</button>`).join('');let list=filter==='All'?cloud.places:cloud.places.filter(p=>p.category===filter);placeList.innerHTML=list.length?list.map(p=>`<div class="place"><div class="placehead"><div class="grow"><span class="pill">${p.category||'Place'}</span><h3 style="margin-top:8px">${p.name}</h3><div class="tiny">📍 ${p.area||''}${p.halal_status?' · '+p.halal_status:''}</div><div class="muted" style="margin-top:5px">${p.notes||''}</div></div></div><div class="placeactions"><a class="btn" target="_blank" href="${navUrl(p.name,p.area)}">Map</a><button class="danger iconbtn" onclick="deleteCloudPlace('${p.id}')">×</button></div></div>`).join(''):'<p class="muted">No places yet.</p>'}
+function renderPlaces(){let cats=['All','Restaurant','Shopping','Attraction','Stay','Other'];filters.innerHTML=cats.map(c=>`<button class="${c===filter?'active':''}" onclick="filter='${c}';renderPlaces()">${c}</button>`).join('');let list=filter==='All'?cloud.places:cloud.places.filter(p=>{
+      if(filter==='Restaurant') return ['Restaurant','Food','Café','Cafe'].includes(p.category);
+      if(filter==='Stay') return ['Stay','Camping','Hotel'].includes(p.category);
+      return p.category===filter;
+    });placeList.innerHTML=list.length?list.map(p=>`<div class="place"><div class="placehead"><div class="grow"><span class="pill">${['Food','Café','Cafe'].includes(p.category)?'Restaurant':['Camping','Hotel'].includes(p.category)?'Stay':(p.category||'Place')}</span><h3 style="margin-top:8px">${p.name}</h3><div class="tiny">📍 ${p.area||''}${p.halal_status?' · '+p.halal_status:''}</div><div class="muted" style="margin-top:5px">${p.notes||''}</div></div></div><div class="placeactions"><a class="btn" target="_blank" href="${navUrl(p.name,p.area)}">Map</a><button class="danger iconbtn" onclick="deleteCloudPlace('${p.id}')">×</button></div></div>`).join(''):'<p class="muted">No places yet.</p>'}
 async function saveCloudPlace(){if(!pname.value)return;let {error}=await sb.from('places').insert({trip_id:activeTrip.id,name:pname.value,category:ptype.value,area:parea.value,halal_status:phalal.value,notes:pnote.value});if(error)return alert(error.message);pname.value=parea.value=pnote.value='';placeModal.classList.remove('open')}
 async function deleteCloudPlace(id){if(confirm('Delete place?')){let {error}=await sb.from('places').delete().eq('id',id);if(error)alert(error.message)}}
 async function placeToTrip(id){let p=cloud.places.find(x=>x.id===id);if(!p)return;let date=prompt('Add to date (YYYY-MM-DD)',activeTrip.start_date);if(!date)return;let title=prompt('Day title','Day plan')||'Day plan',time=prompt('Time','')||null,same=cloud.itinerary.filter(x=>x.day_date===date),sort=same.length?Math.max(...same.map(x=>x.sort_order||0))+1:0;let {error}=await sb.from('itinerary').insert({trip_id:activeTrip.id,day_date:date,day_title:title,activity_time:time,title:p.name,area:p.area,sort_order:sort});if(error)alert(error.message)}

@@ -1,14 +1,17 @@
-# Our Trips V6.4
-Planner/workflow update:
-- + Activity directly on each itinerary day
-- Choose Saved Place or simple Activity
-- Auto-sort activities by time; completed activities remain silver and move below
-- Current day first; future days next; past days below
-- Removed Add to Trip from individual Places
-- New trip no longer asks for latitude, longitude, or timezone
-- Removed redundant Home cards: Trip Day, Members, Rain Chance
-- Added Camping, Hotel and Other place categories
-- Repaired malformed V6.3 trip-opening, day-grouping and expense-delete JavaScript
-- Service worker cache bumped to V6.4
+# Our Trips V6.5
 
-Deploy the web files as before. Keep the SQL patch private; do not upload it to GitHub.
+UI cleanup release.
+
+Changes:
+- Places categories simplified:
+  - Food + Café -> Restaurant
+  - Camping + Hotel -> Stay
+- Existing old records remain compatible:
+  - old Food/Café items appear under Restaurant
+  - old Camping/Hotel items appear under Stay
+- Fixed itinerary checkbox alignment using a dedicated grid column, so the tick no longer overlaps the activity time/title on desktop or mobile.
+- V6.4 planner workflow is retained.
+
+No new Supabase SQL is required.
+
+Deploy/replace the usual web files. If an old cached build remains, open once with `?v=65`.
