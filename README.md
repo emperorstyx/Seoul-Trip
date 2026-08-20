@@ -1,4 +1,19 @@
-# Our Trips V6.6
-UX/personalisation release: proper Trip and Activity edit popups, checklist deletion, immediate document deletion UI, improved weather, destination and place autocomplete, automatic trip currency, MYR/JPY/KRW/IDR/SGD/USD expense currencies, Light/Dark mode, Korea/Sakura/Forest themes, editable display name, profile photo upload, avatar map markers, and warmer visual styling.
+# Our Trips V6.7
 
-Run V6.6_SUPABASE_PATCH.sql once before using profile pictures. Do not upload SQL files publicly.
+Changes:
+- Malaysia trips show only one clock.
+- New-trip destination search + auto currency/timezone.
+- Profile photo has a square crop/resize frame.
+- Profile photo can be removed.
+- "Couple" renamed to "Trip Members".
+- Checklist moved to its own bottom tab.
+- Trip map moved to the bottom of Home.
+- Cloud Sync + About combined into one settings card.
+- Place search/autocomplete added when adding Places.
+- Weather now geocodes any trip city before loading forecast.
+- Map markers use member profile pictures when available.
+- Immediate UI removal after checklist/document deletion.
+- Light/Dark + color theme options included.
+
+Run `V6.7_SUPABASE_PATCH.sql` once before using profile pictures.
+Do not upload SQL files publicly to GitHub.
