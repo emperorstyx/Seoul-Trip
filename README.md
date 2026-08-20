@@ -1,29 +1,17 @@
-# Our Trips V6.3 — Travel Companion Release
+# Our Trips V6.3.1 — Login Hotfix
 
-## New
-- Edit/delete cloud trips
-- Expense delete fix + Paid by Shared/member
-- Activities auto-sort by time
-- Tick Done → silver and moves below unfinished items
-- Undo completed activity
-- Shared activity notes
-- Today / All Days switch
-- Simple NOW / NEXT Home line
-- Destination local time + Malaysia time
-- Optional Today's Progress (OFF by default)
-- Optional Leave Reminder (OFF by default)
-- Offline indicator
-- Post-trip summary
-- Travel Documents & Emergency
-- Private PDF/image uploads via Supabase Storage
-- Version compatibility checking
-- Existing realtime sync and couple live-location remain
+This is a code-only stabilization release for V6.3.
 
-## Required
-Run `V6.3_SUPABASE_PATCH.sql` once in Supabase SQL Editor.
+Fixed:
+- Sign In button doing nothing
+- Create Account button doing nothing
+- Broken open-trip JavaScript
+- Broken itinerary grouping JavaScript
+- Broken expense-delete JavaScript
 
-## Deploy to GitHub Pages
-Upload/replace:
+The V6.3 Supabase database/storage patch is unchanged. If you already ran `V6.3_SUPABASE_PATCH.sql` successfully, DO NOT run another SQL patch for V6.3.1.
+
+Deploy/replace:
 - index.html
 - sw.js
 - manifest.webmanifest
@@ -31,6 +19,4 @@ Upload/replace:
 - icon-512.png
 - README.md
 
-Do not upload the SQL patch to GitHub.
-
-After deployment, open once with `?v=63` if a phone still has an older cached build.
+After deployment, open once with `?v=631` if a phone/browser still shows the broken cached V6.3 build.
