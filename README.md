@@ -1,17 +1,4 @@
-# Our Trips V6.5
+# Our Trips V6.6
+UX/personalisation release: proper Trip and Activity edit popups, checklist deletion, immediate document deletion UI, improved weather, destination and place autocomplete, automatic trip currency, MYR/JPY/KRW/IDR/SGD/USD expense currencies, Light/Dark mode, Korea/Sakura/Forest themes, editable display name, profile photo upload, avatar map markers, and warmer visual styling.
 
-UI cleanup release.
-
-Changes:
-- Places categories simplified:
-  - Food + Café -> Restaurant
-  - Camping + Hotel -> Stay
-- Existing old records remain compatible:
-  - old Food/Café items appear under Restaurant
-  - old Camping/Hotel items appear under Stay
-- Fixed itinerary checkbox alignment using a dedicated grid column, so the tick no longer overlaps the activity time/title on desktop or mobile.
-- V6.4 planner workflow is retained.
-
-No new Supabase SQL is required.
-
-Deploy/replace the usual web files. If an old cached build remains, open once with `?v=65`.
+Run V6.6_SUPABASE_PATCH.sql once before using profile pictures. Do not upload SQL files publicly.
