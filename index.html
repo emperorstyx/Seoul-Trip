@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2456aa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Our Trips">
-<title>Our Trips V6.7.3</title>
+<title>Our Trips V6.7.4</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -253,7 +253,7 @@ body.dark .chipScroll{background:transparent}
 <div class="card"><h2>☁️ App & Cloud</h2>
 <div class="cloudAbout">
 <div><b>Cloud Sync</b><div class="tiny" id="accountInfo"></div><div style="margin-top:8px"><span class="syncDot ok"></span> Supabase connected</div><button class="secondary" style="margin-top:8px" onclick="refreshCloud()">Refresh Cloud</button></div>
-<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.7.3</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
+<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.7.4</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
 </div>
 </div>
 
@@ -316,7 +316,7 @@ body.dark .chipScroll{background:transparent}
 const SUPABASE_URL='https://pbyfokktzpoufsiedqxj.supabase.co';
 const SUPABASE_KEY='sb_publishable_RPb5sSnVAtPJIWCp1KBZEA_XWv8V-Or';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const APP_VERSION='6.7.3';
+const APP_VERSION='6.7.4';
 let authMode='signin',user=null,trips=[],activeTrip=null,
 cloud={itinerary:[],places:[],expenses:[],checks:[],members:[],locations:[],emergency:[],documents:[]},
 filter='All',checkView='mine',realtime=null,map,mapMarkers=[],locationWatch=null,fx={MYR:1},fxDate='',
@@ -566,9 +566,7 @@ async function refreshCloud(){await loadTrips();if(activeTrip)await loadCloudDat
 function setFont(v){document.documentElement.style.setProperty('--fs',v);localStorage.setItem('v6font',v)}
 sb.auth.onAuthStateChange((event,session)=>{if(session?.user&&!user)enterApp(session.user);if(!session?.user&&user)location.reload()});
 (async()=>{let {data}=await sb.auth.getSession();if(data.session?.user)await enterApp(data.session.user);let f=localStorage.getItem('v6font');if(f){fontSize.value=f;setFont(f)}})();
-if('serviceWorker'in navigator)registerOurTripsServiceWorker();
-
-// V6.3: predictable PWA updates. HTML is network-first in sw.js.
+// V6.7.4: predictable PWA updates. HTML is network-first in sw.js.
 let pendingOurTripsWorker = null;
 function showOurTripsUpdate(worker){
   pendingOurTripsWorker = worker || null;
@@ -598,8 +596,14 @@ async function registerOurTripsServiceWorker(){
 document.addEventListener('DOMContentLoaded', ()=>{
   const b=document.getElementById('applyAppUpdate');
   if(b) b.addEventListener('click', ()=>{
-    if(pendingOurTripsWorker) pendingOurTripsWorker.postMessage({type:'SKIP_WAITING'});
-    else location.reload();
+    b.disabled=true;
+    b.textContent='Updating…';
+    if(pendingOurTripsWorker){
+      pendingOurTripsWorker.postMessage({type:'SKIP_WAITING'});
+      setTimeout(()=>location.reload(),1800);
+    }else{
+      location.reload();
+    }
   });
   registerOurTripsServiceWorker();
 });

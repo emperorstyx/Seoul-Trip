@@ -1,13 +1,11 @@
-# Our Trips V6.7.3
-Built directly from the uploaded deployed V6.7.2 file.
+# Our Trips V6.7.4 — PWA Update Button Fix
 
-Fixed:
-- New/empty trip now displays all trip days with + Activity.
-- + Activity opens the correct in-app Add Activity modal.
-- Create Trip no longer fails because hidden country/currency/timezone are empty.
-- Edit Activity uses a proper modal instead of browser prompts.
-- Places header uses compact + Add Place and scrollable category chips.
-- Malformed duplicate placeModal HTML fixed.
-- Service worker cache bumped to V6.7.3.
+Fixes:
+- `Update now` button now works.
+- Service worker handles `SKIP_WAITING`.
+- Button shows `Updating…` after tapping.
+- Fallback reload added if controller switch is slow.
+- Removed duplicate service-worker registration.
+- Cache bumped to `our-trips-v6.7.4`.
 
-No new Supabase SQL required.
+No Supabase SQL changes required.
