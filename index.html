@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2456aa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Our Trips">
-<title>Our Trips V6.7.4</title>
+<title>Our Trips V6.8</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -162,6 +162,38 @@ body.dark .chipScroll{background:transparent}
   #places .primary,#places .secondary,#places .danger{min-height:44px}
 }
 
+
+/* V6.8 Mobile First */
+:root{--tap:44px}
+main{max-width:760px}
+button,.btn{min-height:var(--tap)}
+.card{border-radius:18px}
+.sectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.compactAdd{width:auto!important;min-width:0!important;padding:9px 13px!important;white-space:nowrap}
+.chipScroll{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 1px 8px}
+.chipScroll::-webkit-scrollbar{display:none}
+.chipScroll button{flex:0 0 auto;width:auto!important;min-width:max-content!important;height:44px;padding:0 14px;border-radius:14px}
+.smallIconBtn{width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border-radius:10px!important;display:inline-grid!important;place-items:center!important;font-size:.9rem!important}
+.expenseR{display:flex;align-items:center;justify-content:flex-end;gap:7px}
+@media(max-width:600px){
+  body{font-size:15px}
+  main{padding:12px 12px 96px}
+  .topbar{padding:8px 12px}
+  .avatar{width:42px;height:42px}
+  h1{font-size:1.65rem} h2{font-size:1.12rem}
+  .card{padding:14px;margin-bottom:10px}
+  .row{grid-template-columns:1fr!important}
+  .modalbg{padding:8px}
+  .modal{margin:2vh auto;padding:16px;border-radius:20px;max-height:94vh;overflow:auto}
+  .actions{gap:6px}
+  .actions button,.actions .btn{padding:8px 10px}
+  .iconbtn,.smallIconBtn{width:34px!important;height:34px!important;min-height:34px!important}
+  .weather{min-height:220px}.temp{font-size:2.4rem}
+  .clockCard{grid-template-columns:1fr}
+  .homeMap #mapbox{height:280px;min-height:240px}
+  .bottom button{font-size:.66rem;padding:6px 1px}
+}
+
 </style>
 </head>
 <body>
@@ -202,7 +234,7 @@ body.dark .chipScroll{background:transparent}
 <div class="grid"><div class="card"><div class="muted">Countdown</div><div class="stat" id="countdown">—</div></div></div><div class="card homeMap"><h2>🗺 Trip Map</h2><div class="locationBar"><div><b>Trip location sharing</b><div class="tiny" id="locationStatus">Off</div></div><button id="locationToggle" class="toggle" onclick="toggleLocation()"></button></div><div class="actions" style="margin-top:10px"><button class="secondary" onclick="renderMap()">Refresh map</button></div><div id="mapbox" style="margin-top:10px"></div><p class="tiny">Shows the latest location shared by each trip member while the app is active.</p></div></section>
 
 <section id="trip">
-<div class="triphead"><div><h2>📅 Trip</h2><div class="tiny">Add a saved place or a simple activity directly to each day.</div></div></div>
+<div class="triphead"><div><h2><button class="secondary smallIconBtn" title="Edit trip dates" onclick="openTripDateEditor()">📅</button> Trip</h2><div class="tiny">Tap the calendar to change trip dates.</div></div></div>
 <div class="tripViewTabs"><button id="todayViewBtn" onclick="setTripView('today')">Today</button><button id="allViewBtn" onclick="setTripView('all')">All Days</button></div>
 <div id="days"></div>
 </section>
@@ -253,7 +285,7 @@ body.dark .chipScroll{background:transparent}
 <div class="card"><h2>☁️ App & Cloud</h2>
 <div class="cloudAbout">
 <div><b>Cloud Sync</b><div class="tiny" id="accountInfo"></div><div style="margin-top:8px"><span class="syncDot ok"></span> Supabase connected</div><button class="secondary" style="margin-top:8px" onclick="refreshCloud()">Refresh Cloud</button></div>
-<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.7.4</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
+<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.8</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
 </div>
 </div>
 
@@ -279,17 +311,18 @@ body.dark .chipScroll{background:transparent}
 <div class="actions"><button class="primary" onclick="createCloudTrip()">Create Trip</button><button class="secondary" onclick="tripModal.classList.remove('open')">Cancel</button></div></div></div>
 
 <div id="placeModal" class="modalbg"><div class="modal"><h2>Add Place</h2>
-<div class="row"><input id="pname" placeholder="Search place / restaurant / stay" oninput="schedulePlaceSearch()"><select id="ptype"><option>Restaurant</option><option>Shopping</option><option>Attraction</option><option>Stay</option><option>Other</option></select></div>
-<div id="placeSuggest" class="suggestBox hidden"></div><div class="row"><input id="parea" placeholder="Area / address"><select id="phalal"><option>Halal</option><option>Muslim-friendly</option><option>Check ingredients</option><option>Unknown</option><option>Not applicable</option></select></div>
+<div class="formGroup"><label>AREA / CITY</label><input id="parea" placeholder="e.g. Cameron Highlands" oninput="scheduleAreaSearch()"><div id="placeAreaSuggest" class="suggestBox hidden"></div></div>
+<div class="formGroup"><label>PLACE NAME</label><input id="pname" placeholder="e.g. The Sheep Sanctuary" oninput="schedulePlaceNameSearch()"><div id="placeSuggest" class="suggestBox hidden"></div></div>
+<div class="row"><select id="ptype"><option>Restaurant</option><option>Shopping</option><option>Attraction</option><option>Stay</option><option>Other</option></select><select id="phalal"><option>Halal</option><option>Muslim-friendly</option><option>Check ingredients</option><option>Unknown</option><option>Not applicable</option></select></div>
 <textarea id="pnote" placeholder="Notes / must try"></textarea>
 <div class="actions"><button class="primary" onclick="saveCloudPlace()">Save</button><button class="secondary" onclick="placeModal.classList.remove('open')">Cancel</button></div>
 </div></div>
 <div id="activityModal" class="modalbg"><div class="modal"><h2 id="activityModalTitle">Add Activity</h2>
 <input id="adate" type="hidden"><input id="adaytitle" type="hidden">
 <div class="tabs"><button id="atypePlace" class="active" onclick="setActivityType('place')">📍 Saved Place</button><button id="atypeActivity" onclick="setActivityType('activity')">✨ Activity</button></div>
-<div id="activityPlaceRow"><select id="aplace"></select></div>
+<div id="activityPlaceRow"><select id="aplace" onchange="syncSavedPlaceArea()"></select></div>
 <div id="activityFreeRow" class="hidden"><input id="atitle" placeholder="Activity e.g. Rest, Breakfast, Check-in"></div>
-<div class="row" style="margin-top:8px"><input id="atime" type="time"><input id="aarea" placeholder="Area / location (optional)"></div>
+<div class="row" style="margin-top:8px"><input id="atime" type="time"><div><input id="aarea" placeholder="Area / location (optional)" oninput="scheduleActivityAreaSearch()"><div id="activityAreaSuggest" class="suggestBox hidden"></div></div></div>
 <textarea id="anotes" placeholder="Notes (optional)"></textarea>
 <div class="actions"><button class="primary" onclick="saveDayActivity()">Add to Day</button><button class="secondary" onclick="activityModal.classList.remove('open')">Cancel</button></div>
 </div></div>
@@ -304,7 +337,6 @@ body.dark .chipScroll{background:transparent}
 <div class="actions"><button class="primary" onclick="saveTripEdit()">Save Changes</button><button class="secondary" onclick="editTripModal.classList.remove('open')">Cancel</button></div>
 </div></div>
 
-<div id="editActivityModal" class="modalbg"><div class="modal"><h2>✨ Edit Activity</h2><input id="eaid" type="hidden"><div class="formGroup"><label>ACTIVITY</label><input id="eatitle"></div><div class="row"><div class="formGroup"><label>TIME</label><input id="eatime" type="time"></div><div class="formGroup"><label>AREA / LOCATION</label><input id="eaarea"></div></div><div class="formGroup"><label>NOTES</label><textarea id="eanotes"></textarea></div><div class="actions"><button class="primary" onclick="saveActivityEdit()">Save Changes</button><button class="secondary" onclick="editActivityModal.classList.remove('open')">Cancel</button></div></div></div>
 <div id="profileModal" class="modalbg"><div class="modal"><h2>👤 My Profile</h2>
 <div class="formGroup"><label>DISPLAY NAME</label><input id="profileName"></div>
 <div class="formGroup"><label>PROFILE PICTURE</label><input id="profileFile" type="file" accept="image/*" onchange="loadProfileCrop(event)"></div>
@@ -316,7 +348,7 @@ body.dark .chipScroll{background:transparent}
 const SUPABASE_URL='https://pbyfokktzpoufsiedqxj.supabase.co';
 const SUPABASE_KEY='sb_publishable_RPb5sSnVAtPJIWCp1KBZEA_XWv8V-Or';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const APP_VERSION='6.7.4';
+const APP_VERSION='6.8';
 let authMode='signin',user=null,trips=[],activeTrip=null,
 cloud={itinerary:[],places:[],expenses:[],checks:[],members:[],locations:[],emergency:[],documents:[]},
 filter='All',checkView='mine',realtime=null,map,mapMarkers=[],locationWatch=null,fx={MYR:1},fxDate='',
@@ -410,18 +442,7 @@ async function importSeoul2026(){
   }
 }
 
-async function createCloudTrip(){
- if(!tname.value.trim()||!tcity.value.trim()||!tstart.value||!tend.value)return alert('Fill trip name, destination and dates.');
- let city=tcity.dataset.city||tcity.value.split(',')[0].trim();
- let country=tcountry.value||tcity.value.split(',').slice(-1)[0].trim()||'Malaysia';
- let currency=tcurrency.value||currencyFor(country);
- let timezone=ttimezone.value||tcity.dataset.timezone||inferTimezone(country,city);
- let payload={name:tname.value.trim(),country,city,currency,start_date:tstart.value,end_date:tend.value,timezone,created_by:user.id};
- let {data,error}=await sb.from('trips').insert(payload).select().single();
- if(error)return alert(error.message);
- tripModal.classList.remove('open');
- await loadTrips(); await openCloudTrip(data.id);
-}
+async function createCloudTrip(){if(!tname.value||!tcountry.value||!tcity.value||!tstart.value||!tend.value)return alert('Fill trip name, country, city and dates.');let payload={name:tname.value,country:tcountry.value,city:tcity.value,currency:tcurrency.value||'MYR',start_date:tstart.value,end_date:tend.value,timezone:inferTimezone(tcountry.value,tcity.value),created_by:user.id};let {data,error}=await sb.from('trips').insert(payload).select().single();if(error)return alert(error.message);tripModal.classList.remove('open');await loadTrips();await openCloudTrip(data.id)}
 async function editTrip(id){let t=trips.find(x=>x.id===id);if(!t)return;etid.value=id;etname.value=t.name||'';etcity.value=[t.city,t.country].filter(Boolean).join(', ');etcountry.value=t.country||'';etcurrency.value=t.currency||currencyFor(t.country);ettimezone.value=t.timezone||inferTimezone(t.country,t.city);etstart.value=t.start_date||'';etend.value=t.end_date||'';editTripModal.classList.add('open')}
 async function saveTripEdit(){let id=etid.value,t=trips.find(x=>x.id===id);if(!t)return;let city=etcity.dataset.city||etcity.value.split(',')[0].trim(),country=etcountry.value||t.country||etcity.value.split(',').slice(-1)[0].trim();let payload={name:etname.value.trim()||t.name,city,country,currency:etcurrency.value||currencyFor(country),timezone:ettimezone.value||inferTimezone(country,city),start_date:etstart.value,end_date:etend.value};let {error}=await sb.from('trips').update(payload).eq('id',id);if(error)return alert(error.message);editTripModal.classList.remove('open');await loadTrips();if(activeTrip?.id===id){activeTrip=trips.find(x=>x.id===id);renderAll()}}
 async function deleteTrip(id){let t=trips.find(x=>x.id===id);if(!t)return;if(!confirm(`Delete "${t.name}"?
@@ -443,7 +464,9 @@ function subscribeRealtime(){if(realtime)sb.removeChannel(realtime);if(!activeTr
 function navUrl(name,area=''){let q=encodeURIComponent(name+' '+area+' '+(activeTrip?.city||''));return (activeTrip?.country||'').toLowerCase().includes('korea')?'https://map.naver.com/p/search/'+q:'https://www.google.com/maps/search/?api=1&query='+q}
 function groupDays(){let m=new Map();cloud.itinerary.forEach(x=>{let k=(x.day_date||'')+'|'+(x.day_title||'Day');if(!m.has(k))m.set(k,[]);m.get(k).push(x)});let today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));return [...m.entries()].map(([k,items])=>{let [date,title]=k.split('|');items.sort((a,b)=>Number(!!a.completed)-Number(!!b.completed)||timeSort(a.activity_time)-timeSort(b.activity_time)||((a.sort_order||0)-(b.sort_order||0)));return {date,title,items}}).sort((a,b)=>{let rank=d=>d===today?0:(d>today?1:2),r=rank(a.date)-rank(b.date);if(r)return r;return rank(a.date)===2?b.date.localeCompare(a.date):a.date.localeCompare(b.date)})}
 function renderAll(){if(!activeTrip)return;renderHome();renderItinerary();renderPlaces();renderExpenses();renderChecks();renderMembers();renderEmergency();renderDocuments();renderSettings();renderDualClock()}
-function renderHome(){hero.innerHTML=`<span class="pill">${flag(activeTrip.country)} ${activeTrip.country||''}</span><h1>${activeTrip.name}</h1><p class="muted">${activeTrip.start_date||''} → ${activeTrip.end_date||''} · Trip code <b>${activeTrip.join_code}</b></p>`;let today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city)),sd=activeTrip.start_date,ed=activeTrip.end_date;countdown.textContent=today<sd?daysBetween(today,sd)+' days':(today<=ed?'Trip time!':'Complete');let currentDay=groupDays().find(d=>d.date===today),candidates=(currentDay?.items||[]).filter(a=>!a.completed);if(!candidates.length)candidates=groupDays().flatMap(d=>d.items).filter(a=>!a.completed);let n=chooseNextActivity(candidates,today);renderSmartNow(n,today);wloc.textContent=(activeTrip.city||'DESTINATION').toUpperCase()+' WEATHER';ecur.innerHTML=[activeTrip.currency,'MYR','SGD','USD'].filter((x,i,a)=>x&&a.indexOf(x)===i).map(x=>`<option>${x}</option>`).join('');populatePayers();renderSpendTotal();renderOptionalProgress(currentDay);renderTripSummary(today)}
+function renderHome(){hero.innerHTML=`<span class="pill">${flag(activeTrip.country)} ${activeTrip.country||''}</span><h1>${activeTrip.name}</h1><p class="muted">${activeTrip.start_date||''} → ${activeTrip.end_date||''} · Trip code <b>${activeTrip.join_code}</b></p>`;let today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city)),sd=activeTrip.start_date,ed=activeTrip.end_date;if(today<sd){countdown.textContent=daysBetween(today,sd)+' days';countdown.closest('.card')?.classList.remove('hidden')}
+else if(today<=ed){countdown.textContent='Trip time!';countdown.closest('.card')?.classList.remove('hidden')}
+else{countdown.closest('.card')?.classList.add('hidden')}let currentDay=groupDays().find(d=>d.date===today),candidates=(currentDay?.items||[]).filter(a=>!a.completed);if(!candidates.length)candidates=groupDays().flatMap(d=>d.items).filter(a=>!a.completed);let n=chooseNextActivity(candidates,today);renderSmartNow(n,today);wloc.textContent=(activeTrip.city||'DESTINATION').toUpperCase()+' WEATHER';ecur.innerHTML=[activeTrip.currency,'MYR','SGD','KRW','JPY','IDR','USD'].filter((x,i,a)=>x&&a.indexOf(x)===i).map(x=>`<option>${x}</option>`).join('');populatePayers();renderSpendTotal();renderOptionalProgress(currentDay);renderTripSummary(today)}
 
 function tripDates(){
   if(!activeTrip?.start_date||!activeTrip?.end_date)return[];
@@ -452,26 +475,26 @@ function tripDates(){
   return out
 }
 function openActivityForDate(date){
-  openDayActivity(date,'Day '+(tripDates().indexOf(date)+1));
+  if(typeof openActivityModal==='function')openActivityModal();
+  setTimeout(()=>{let el=document.getElementById('adate')||document.getElementById('activityDate');if(el)el.value=date},0)
 }
 function renderEmptyTripDays(){
   let dates=tripDates();
-  if(!dates.length){days.innerHTML='<div class="card muted">Trip dates are missing. Edit the trip to add dates.</div>';return}
-  days.innerHTML=dates.map((date,i)=>`<div class="card"><div class="dayHead"><div><div class="pill">${date}</div><h2>Day ${i+1}</h2></div><button class="primary compactAdd" onclick="openActivityForDate('${date}')">+ Activity</button></div><div class="muted" style="margin-top:14px">Nothing planned yet.</div></div>`).join('')
+  if(!dates.length){itinerary.innerHTML='<div class="card muted">Trip dates are missing. Edit the trip to add dates.</div>';return}
+  itinerary.innerHTML=dates.map((date,i)=>`<div class="card"><div class="dayHead"><div><div class="pill">${date}</div><h2>Day ${i+1}</h2></div><button class="primary compactAdd" onclick="openActivityForDate('${date}')">+ Activity</button></div><div class="muted" style="margin-top:14px">Nothing planned yet.</div></div>`).join('')
 }
 
-function renderItinerary(){todayViewBtn.classList.toggle('active',tripView==='today');allViewBtn.classList.toggle('active',tripView==='all');let ds=groupDays(),today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));if(!cloud.itinerary.length){renderEmptyTripDays();return;}if(tripView==='today')ds=ds.filter(d=>d.date===today);window.days.innerHTML=ds.length?ds.map(d=>`<div class="card"><div class="dayHead"><div><span class="pill">${d.date}${d.date===today?' · TODAY':''}</span><h2>${d.title}</h2></div><button class="primary" onclick="openDayActivity('${d.date}',this.dataset.title)" data-title="${escapeHtml(d.title)}">+ Activity</button></div>${d.items.map(a=>`<div class="activity ${a.completed?'doneActivity':''}"><input class="activityCheck" type="checkbox" ${a.completed?'checked':''} onchange="toggleActivityDone('${a.id}',this.checked)"><b>${String(a.activity_time||'').slice(0,5)||'—'} · ${a.title}</b><div class="muted">${a.area||''}</div>${a.notes?`<div class="tiny">📝 ${a.notes}</div>`:''}<div class="actions" style="margin-top:7px">${a.area?`<a class="btn" target="_blank" href="${navUrl(a.title,a.area)}">Map</a>`:''}${a.completed?`<button class="secondary" onclick="toggleActivityDone('${a.id}',false)">↩ Undo</button>`:''}<button class="secondary" onclick="editCloudStop('${a.id}')">Edit</button><button class="danger iconbtn" onclick="deleteCloudStop('${a.id}')">×</button></div></div>`).join('')}</div>`).join(''):`<div class="card"><p class="muted">${tripView==='today'?'No activities for today.':'No itinerary yet.'}</p></div>`}
+function renderItinerary(){todayViewBtn.classList.toggle('active',tripView==='today');allViewBtn.classList.toggle('active',tripView==='all');let ds=groupDays(),today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));if(tripView==='today')ds=ds.filter(d=>d.date===today);window.days.innerHTML=ds.length?ds.map(d=>`<div class="card"><div class="dayHead"><div><span class="pill">${d.date}${d.date===today?' · TODAY':''}</span><h2>${d.title}</h2></div><button class="primary" onclick="openDayActivity('${d.date}',this.dataset.title)" data-title="${escapeHtml(d.title)}">+ Activity</button></div>${d.items.map(a=>`<div class="activity ${a.completed?'doneActivity':''}"><input class="activityCheck" type="checkbox" ${a.completed?'checked':''} onchange="toggleActivityDone('${a.id}',this.checked)"><b>${String(a.activity_time||'').slice(0,5)||'—'} · ${a.title}</b><div class="muted">${a.area||''}</div>${a.notes?`<div class="tiny">📝 ${a.notes}</div>`:''}<div class="actions" style="margin-top:7px">${a.area?`<a class="btn" target="_blank" href="${navUrl(a.title,a.area)}">Map</a>`:''}${a.completed?`<button class="secondary" onclick="toggleActivityDone('${a.id}',false)">↩ Undo</button>`:''}<button class="secondary" onclick="editCloudStop('${a.id}')">Edit</button><button class="danger smallIconBtn" onclick="deleteCloudStop('${a.id}')">×</button></div></div>`).join('')}</div>`).join(''):`<div class="card"><p class="muted">${tripView==='today'?'No activities for today.':'No itinerary yet.'}</p></div>`}
 async function toggleActivityDone(id,v){let {error}=await sb.from('itinerary').update({completed:v}).eq('id',id);if(error)alert(error.message)}
 function setTripView(v){tripView=v;renderItinerary()}
 async function addCloudStop(){let date=prompt('Date (YYYY-MM-DD)',activeTrip.start_date);if(!date)return;let dayTitle=prompt('Day title','Day plan')||'Day plan',title=prompt('Place / activity');if(!title)return;let time=prompt('Time (HH:MM)','10:00')||null,area=prompt('Area',activeTrip.city)||'',notes=prompt('Notes (optional)','')||'',same=cloud.itinerary.filter(x=>x.day_date===date),sort=same.length?Math.max(...same.map(x=>x.sort_order||0))+1:0;let {error}=await sb.from('itinerary').insert({trip_id:activeTrip.id,day_date:date,day_title:dayTitle,activity_time:time,title,area,notes,completed:false,sort_order:sort});if(error)alert(error.message)}
-function editCloudStop(id){let a=cloud.itinerary.find(x=>x.id===id);if(!a)return;eaid.value=id;eatitle.value=a.title||'';eatime.value=String(a.activity_time||'').slice(0,5);eaarea.value=a.area||'';eanotes.value=a.notes||'';editActivityModal.classList.add('open')}
-async function saveActivityEdit(){let id=eaid.value;if(!id||!eatitle.value.trim())return;let {error}=await sb.from('itinerary').update({title:eatitle.value.trim(),activity_time:eatime.value||null,area:eaarea.value.trim(),notes:eanotes.value.trim()}).eq('id',id);if(error)return alert(error.message);editActivityModal.classList.remove('open')}
+async function editCloudStop(id){let a=cloud.itinerary.find(x=>x.id===id);if(!a)return;let title=prompt('Place / activity',a.title);if(title===null)return;let time=prompt('Time',String(a.activity_time||'').slice(0,5));if(time===null)return;let area=prompt('Area',a.area||'');if(area===null)return;let notes=prompt('Notes',a.notes||'');if(notes===null)return;let {error}=await sb.from('itinerary').update({title,activity_time:time||null,area,notes}).eq('id',id);if(error)alert(error.message)}
 async function deleteCloudStop(id){if(confirm('Delete this stop?')){let {error}=await sb.from('itinerary').delete().eq('id',id);if(error)alert(error.message)}}
 function renderPlaces(){let cats=['All','Restaurant','Shopping','Attraction','Stay','Other'];filters.innerHTML=cats.map(c=>`<button class="${c===filter?'active':''}" onclick="filter='${c}';renderPlaces()">${c}</button>`).join('');let list=filter==='All'?cloud.places:cloud.places.filter(p=>{
       if(filter==='Restaurant') return ['Restaurant','Food','Café','Cafe'].includes(p.category);
       if(filter==='Stay') return ['Stay','Camping','Hotel'].includes(p.category);
       return p.category===filter;
-    });placeList.innerHTML=list.length?list.map(p=>`<div class="place"><div class="placehead"><div class="grow"><span class="pill">${['Food','Café','Cafe'].includes(p.category)?'Restaurant':['Camping','Hotel'].includes(p.category)?'Stay':(p.category||'Place')}</span><h3 style="margin-top:8px">${p.name}</h3><div class="tiny">📍 ${p.area||''}${p.halal_status?' · '+p.halal_status:''}</div><div class="muted" style="margin-top:5px">${p.notes||''}</div></div></div><div class="placeactions"><a class="btn" target="_blank" href="${navUrl(p.name,p.area)}">Map</a><button class="danger iconbtn" onclick="deleteCloudPlace('${p.id}')">×</button></div></div>`).join(''):'<p class="muted">No places yet.</p>'}
+    });placeList.innerHTML=list.length?list.map(p=>`<div class="place"><div class="placehead"><div class="grow"><span class="pill">${['Food','Café','Cafe'].includes(p.category)?'Restaurant':['Camping','Hotel'].includes(p.category)?'Stay':(p.category||'Place')}</span><h3 style="margin-top:8px">${p.name}</h3><div class="tiny">📍 ${p.area||''}${p.halal_status?' · '+p.halal_status:''}</div><div class="muted" style="margin-top:5px">${p.notes||''}</div></div></div><div class="placeactions"><a class="btn" target="_blank" href="${navUrl(p.name,p.area)}">Map</a><button class="danger smallIconBtn" onclick="deleteCloudPlace('${p.id}')">×</button></div></div>`).join(''):'<p class="muted">No places yet.</p>'}
 async function saveCloudPlace(){if(!pname.value)return;let {error}=await sb.from('places').insert({trip_id:activeTrip.id,name:pname.value,category:ptype.value,area:parea.value,halal_status:phalal.value,notes:pnote.value});if(error)return alert(error.message);pname.value=parea.value=pnote.value='';placeModal.classList.remove('open')}
 async function deleteCloudPlace(id){if(confirm('Delete place?')){let {error}=await sb.from('places').delete().eq('id',id);if(error)alert(error.message)}}
 async function placeToTrip(id){let p=cloud.places.find(x=>x.id===id);if(!p)return;let date=prompt('Add to date (YYYY-MM-DD)',activeTrip.start_date);if(!date)return;let title=prompt('Day title','Day plan')||'Day plan',time=prompt('Time','')||null,same=cloud.itinerary.filter(x=>x.day_date===date),sort=same.length?Math.max(...same.map(x=>x.sort_order||0))+1:0;let {error}=await sb.from('itinerary').insert({trip_id:activeTrip.id,day_date:date,day_title:title,activity_time:time,title:p.name,area:p.area,sort_order:sort});if(error)alert(error.message)}
@@ -482,12 +505,12 @@ function myr(v){return 'RM '+Number(v||0).toFixed(2)}function toMYR(a,c){return 
 function renderSpendTotal(){let sum=0,ok=true;cloud.expenses.forEach(e=>{let v=toMYR(e.amount,e.currency);if(v==null)ok=false;else sum+=v});homeSpend.textContent=myr(sum);homeSpendNote.textContent=(ok?'Latest available FX':'Some FX unavailable')+(fxDate?' · updated '+fxDate:'')}
 function payerName(id){if(!id)return 'Shared';let m=cloud.members.find(x=>x.user_id===id);return m?.display_name||(id===user.id?'Me':'Partner')}
 function populatePayers(){if(typeof epayer==='undefined')return;epayer.innerHTML=`<option value="shared">🤝 Shared</option>`+cloud.members.map(m=>`<option value="${m.user_id}">${m.user_id===user.id?'👦':'👧'} ${m.display_name||'Member'}</option>`).join('')}
-function renderExpenses(){let sum=0,ok=true;cloud.expenses.forEach(e=>{let v=toMYR(e.amount,e.currency);if(v==null)ok=false;else sum+=v});totals.innerHTML=`<div class="muted">Total spent</div><div class="bigmoney">${myr(sum)}</div><div class="converted">${ok?'Converted to MYR using latest available rates':'Some currency conversion unavailable'}</div>`;expenses.innerHTML=cloud.expenses.map(e=>{let v=toMYR(e.amount,e.currency);return `<div class="expense"><div><b>${e.item_name}</b><div class="tiny">${e.category||''} · Paid by ${payerName(e.paid_by)}</div></div><div class="expenseR"><b>${e.currency} ${Number(e.amount).toFixed(e.currency==='KRW'?0:2)}</b>${e.currency!=='MYR'?`<div class="converted">≈ ${v==null?'—':myr(v)}</div>`:''}<button class="danger iconbtn" title="Delete expense" onclick="deleteExpense('${e.id}')">🗑</button></div></div>`}).join('');renderSpendTotal();populatePayers()}
+function renderExpenses(){let sum=0,ok=true;cloud.expenses.forEach(e=>{let v=toMYR(e.amount,e.currency);if(v==null)ok=false;else sum+=v});totals.innerHTML=`<div class="muted">Total spent</div><div class="bigmoney">${myr(sum)}</div><div class="converted">${ok?'Converted to MYR using latest available rates':'Some currency conversion unavailable'}</div>`;expenses.innerHTML=cloud.expenses.map(e=>{let v=toMYR(e.amount,e.currency);return `<div class="expense"><div><b>${e.item_name}</b><div class="tiny">${e.category||''} · Paid by ${payerName(e.paid_by)}</div></div><div class="expenseR"><b>${e.currency} ${Number(e.amount).toFixed(e.currency==='KRW'?0:2)}</b>${e.currency!=='MYR'?`<div class="converted">≈ ${v==null?'—':myr(v)}</div>`:''}<button class="danger smallIconBtn" title="Delete expense" onclick="deleteExpense('${e.id}')">🗑</button></div></div>`}).join('');renderSpendTotal();populatePayers()}
 async function deleteExpense(id){if(!confirm('Delete this expense?'))return;let {error}=await sb.from('expenses').delete().eq('id',id);if(error)return alert('Could not delete expense: '+error.message);cloud.expenses=cloud.expenses.filter(x=>x.id!==id);renderExpenses()}
 function partner(){return cloud.members.find(m=>m.user_id!==user.id)||null}
 function pickChecklist(v,b){checkView=v;document.querySelectorAll('#more .tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderChecks()}
 function checklistRows(){if(checkView==='shared')return cloud.checks.filter(x=>x.list_type==='shared');if(checkView==='mine')return cloud.checks.filter(x=>x.list_type==='personal'&&x.owner_id===user.id);let p=partner();return p?cloud.checks.filter(x=>x.list_type==='personal'&&x.owner_id===p.user_id):[]}
-function renderChecks(){let arr=checklistRows(),editable=checkView!=='partner';checkAddRow.classList.toggle('hidden',!editable);checkList.innerHTML=arr.length?arr.map(x=>`<div class="check"><label class="checkleft"><input type="checkbox" ${x.completed?'checked':''} ${editable?'':'disabled'} onchange="toggleCheck('${x.id}',this.checked)"><span>${x.item_text}</span></label>${editable?`<span class="checkactions"><button class="secondary iconbtn" onclick="editCheck('${x.id}')">✏️</button><button class="danger iconbtn" onclick="deleteCheck('${x.id}')">×</button></span>`:''}</div>`).join(''):`<p class="muted">${checkView==='partner'&&!partner()?'Partner has not joined this trip yet.':'Empty — add your own items.'}</p>`}
+function renderChecks(){let arr=checklistRows(),editable=checkView!=='partner';checkAddRow.classList.toggle('hidden',!editable);checkList.innerHTML=arr.length?arr.map(x=>`<div class="check"><label class="checkleft"><input type="checkbox" ${x.completed?'checked':''} ${editable?'':'disabled'} onchange="toggleCheck('${x.id}',this.checked)"><span>${x.item_text}</span></label>${editable?`<span class="checkactions"><button class="secondary iconbtn" onclick="editCheck('${x.id}')">✏️</button><button class="danger smallIconBtn" onclick="deleteCheck('${x.id}')">×</button></span>`:''}</div>`).join(''):`<p class="muted">${checkView==='partner'&&!partner()?'Partner has not joined this trip yet.':'Empty — add your own items.'}</p>`}
 async function addCloudCheck(){let text=newCheck.value.trim();if(!text)return;let payload={trip_id:activeTrip.id,item_text:text,completed:false,sort_order:checklistRows().length};if(checkView==='shared'){payload.list_type='shared';payload.owner_id=null}else{payload.list_type='personal';payload.owner_id=user.id}let {error}=await sb.from('checklists').insert(payload);if(error)return alert(error.message);newCheck.value=''}
 async function toggleCheck(id,v){let {error}=await sb.from('checklists').update({completed:v}).eq('id',id);if(error)alert(error.message)}
 async function editCheck(id){let x=cloud.checks.find(c=>c.id===id),v=prompt('Edit item',x?.item_text||'');if(v===null)return;let {error}=await sb.from('checklists').update({item_text:v}).eq('id',id);if(error)alert(error.message)}
@@ -497,7 +520,7 @@ function renderMembers(){memberList.innerHTML=cloud.members.map(m=>`<div class="
 
 let activityType='place';
 function escapeHtml(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function openDayActivity(date,title){adate.value=date;adaytitle.value=title;activityModalTitle.textContent='Add Activity · '+date;aplace.innerHTML=cloud.places.length?cloud.places.map(p=>`<option value="${p.id}">${p.name}${p.area?' · '+p.area:''}</option>`).join(''):'<option value="">No saved places yet</option>';atime.value='';atitle.value='';aarea.value='';anotes.value='';setActivityType(cloud.places.length?'place':'activity');activityModal.classList.add('open')}
+function openDayActivity(date,title){adate.value=date;adaytitle.value=title;activityModalTitle.textContent='Add Activity · '+date;aplace.innerHTML=cloud.places.length?cloud.places.map(p=>`<option value="${p.id}">${p.name}${p.area?' · '+p.area:''}</option>`).join(''):'<option value="">No saved places yet</option>';atime.value='';atitle.value='';aarea.value='';anotes.value='';setActivityType(cloud.places.length?'place':'activity');syncSavedPlaceArea();activityModal.classList.add('open')}
 function setActivityType(v){activityType=v;atypePlace.classList.toggle('active',v==='place');atypeActivity.classList.toggle('active',v==='activity');activityPlaceRow.classList.toggle('hidden',v!=='place');activityFreeRow.classList.toggle('hidden',v!=='activity')}
 async function saveDayActivity(){let date=adate.value,dayTitle=adaytitle.value||'Day plan',title='',area=aarea.value.trim();if(activityType==='place'){let p=cloud.places.find(x=>x.id===aplace.value);if(!p)return alert('Choose a saved place, or select Activity.');title=p.name;area=area||p.area||''}else{title=atitle.value.trim();if(!title)return alert('Enter an activity.')}let same=cloud.itinerary.filter(x=>x.day_date===date),sort=same.length?Math.max(...same.map(x=>x.sort_order||0))+1:0;let {error}=await sb.from('itinerary').insert({trip_id:activeTrip.id,day_date:date,day_title:dayTitle,activity_time:atime.value||null,title,area,notes:anotes.value.trim(),completed:false,sort_order:sort});if(error)return alert(error.message);activityModal.classList.remove('open')}
 
@@ -526,6 +549,21 @@ async function croppedProfileBlob(){if(!profileImageData)return null;let img=new
 async function saveProfile(){let m=cloud.members.find(x=>x.user_id===user.id),name=profileName.value.trim()||'Traveller',avatar=m?.avatar_url||null,blob=await croppedProfileBlob();if(blob){let path=`${user.id}/${Date.now()}.jpg`,up=await sb.storage.from('avatars').upload(path,blob,{contentType:'image/jpeg'});if(up.error)return alert(up.error.message);avatar=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl}let {error}=await sb.from('trip_members').update({display_name:name,avatar_url:avatar}).eq('trip_id',activeTrip.id).eq('user_id',user.id);if(error)return alert(error.message);profileModal.classList.remove('open');await loadCloudData()}
 async function removeProfilePicture(){let {error}=await sb.from('trip_members').update({avatar_url:null}).eq('trip_id',activeTrip.id).eq('user_id',user.id);if(error)return alert(error.message);profileImageData=null;cropWrap.classList.add('hidden');await loadCloudData();alert('Profile picture removed.')}
 
+
+let areaSearchTimer=null,placeNameSearchTimer=null,activityAreaTimer=null;
+async function geoSearch(q,limit=6){
+  let url=`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=${limit}&q=${encodeURIComponent(q)}`;
+  return await fetch(url,{headers:{Accept:'application/json'}}).then(r=>r.json());
+}
+function scheduleAreaSearch(){clearTimeout(areaSearchTimer);let q=parea.value.trim();if(q.length<2){placeAreaSuggest.classList.add('hidden');return}areaSearchTimer=setTimeout(async()=>{try{let rows=await geoSearch(q,6);window._areaResults=rows;placeAreaSuggest.innerHTML=rows.map((x,i)=>`<div class="suggestItem" onclick="pickArea(${i})"><b>${escapeHtml(x.display_name.split(',')[0])}</b><div class="tiny">${escapeHtml(x.display_name)}</div></div>`).join('')||'<div class="suggestItem muted">No match. Manual entry still works.</div>';placeAreaSuggest.classList.remove('hidden')}catch(e){placeAreaSuggest.innerHTML='<div class="suggestItem muted">Search unavailable. Manual entry still works.</div>';placeAreaSuggest.classList.remove('hidden')}},350)}
+function pickArea(i){let x=window._areaResults?.[i];if(!x)return;parea.value=x.display_name;parea.dataset.lat=x.lat||'';parea.dataset.lng=x.lon||'';placeAreaSuggest.classList.add('hidden')}
+function schedulePlaceNameSearch(){clearTimeout(placeNameSearchTimer);let q=pname.value.trim(),area=parea.value.trim();if(q.length<2){placeSuggest.classList.add('hidden');return}placeNameSearchTimer=setTimeout(async()=>{try{let query=area?q+', '+area:q+', '+(activeTrip?.city||'')+', '+(activeTrip?.country||'');let rows=await geoSearch(query,8);window._placeResults=rows;placeSuggest.innerHTML=rows.map((x,i)=>`<div class="suggestItem" onclick="pickPlaceV68(${i})"><b>${escapeHtml(x.name||x.display_name.split(',')[0])}</b><div class="tiny">${escapeHtml(x.display_name)}</div></div>`).join('')||'<div class="suggestItem muted">No exact match nearby. Try a shorter name or save manually.</div>';placeSuggest.classList.remove('hidden')}catch(e){placeSuggest.innerHTML='<div class="suggestItem muted">Location search unavailable. Manual entry still works.</div>';placeSuggest.classList.remove('hidden')}},350)}
+function pickPlaceV68(i){let x=window._placeResults?.[i];if(!x)return;pname.value=x.name||x.display_name.split(',')[0];parea.value=x.display_name||parea.value;placeSuggest.classList.add('hidden')}
+function scheduleActivityAreaSearch(){clearTimeout(activityAreaTimer);let q=aarea.value.trim();if(q.length<2){activityAreaSuggest.classList.add('hidden');return}activityAreaTimer=setTimeout(async()=>{try{let rows=await geoSearch(q+', '+(activeTrip?.city||'')+', '+(activeTrip?.country||''),6);window._activityAreaResults=rows;activityAreaSuggest.innerHTML=rows.map((x,i)=>`<div class="suggestItem" onclick="pickActivityArea(${i})"><b>${escapeHtml(x.name||x.display_name.split(',')[0])}</b><div class="tiny">${escapeHtml(x.display_name)}</div></div>`).join('')||'<div class="suggestItem muted">No match. You can still type manually.</div>';activityAreaSuggest.classList.remove('hidden')}catch(e){activityAreaSuggest.innerHTML='<div class="suggestItem muted">Search unavailable.</div>';activityAreaSuggest.classList.remove('hidden')}},350)}
+function pickActivityArea(i){let x=window._activityAreaResults?.[i];if(!x)return;aarea.value=x.display_name||'';activityAreaSuggest.classList.add('hidden')}
+function syncSavedPlaceArea(){let p=cloud.places.find(x=>x.id===aplace.value);if(p)aarea.value=p.area||''}
+function openTripDateEditor(){if(activeTrip)editTrip(activeTrip.id)}
+
 function inferTimezone(country='',city=''){let s=(country+' '+city).toLowerCase();if(s.includes('korea')||s.includes('seoul'))return 'Asia/Seoul';if(s.includes('japan')||s.includes('tokyo')||s.includes('osaka')||s.includes('kyoto'))return 'Asia/Tokyo';if(s.includes('singapore'))return 'Asia/Singapore';if(s.includes('malaysia')||s.includes('kuala lumpur')||s.includes('johor'))return 'Asia/Kuala_Lumpur';if(s.includes('bali'))return 'Asia/Makassar';if(s.includes('jakarta'))return 'Asia/Jakarta';if(s.includes('bangkok')||s.includes('thailand'))return 'Asia/Bangkok';return Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Kuala_Lumpur'}
 function dateInTZ(tz){let p=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),o={};p.forEach(x=>o[x.type]=x.value);return `${o.year}-${o.month}-${o.day}`}
 function currentMinutes(tz){let p=new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()),o={};p.forEach(x=>o[x.type]=x.value);return (+o.hour)*60+(+o.minute)}
@@ -541,12 +579,12 @@ function renderTripSummary(today){let after=today>activeTrip.end_date;tripSummar
 function toggleSetting(k){appSettings[k]=!appSettings[k];localStorage.setItem('v67settings',JSON.stringify(appSettings));renderSettings();renderHome()}
 function setBuffer(v){appSettings.buffer=+v||30;localStorage.setItem('v67settings',JSON.stringify(appSettings));renderSettings();renderHome()}
 function renderSettings(){if(typeof progressToggle==='undefined')return;progressToggle.classList.toggle('on',!!appSettings.showProgress);travelToggle.classList.toggle('on',!!appSettings.travelWarning);bufferSelect.value=String(appSettings.buffer||30);aboutVersion.textContent=APP_VERSION;applyLook()}
-function renderEmergency(){if(typeof emergencyList==='undefined')return;emergencyList.innerHTML=cloud.emergency.length?cloud.emergency.map(x=>`<div class="emergencyItem"><b>${x.label}</b><div class="muted">${x.value}</div><button class="danger iconbtn" style="float:right;margin-top:-34px" onclick="deleteEmergencyInfo('${x.id}')">×</button></div>`).join(''):'<div class="tiny">No emergency information added.</div>'}
+function renderEmergency(){if(typeof emergencyList==='undefined')return;emergencyList.innerHTML=cloud.emergency.length?cloud.emergency.map(x=>`<div class="emergencyItem"><b>${x.label}</b><div class="muted">${x.value}</div><button class="danger smallIconBtn" style="float:right;margin-top:-34px" onclick="deleteEmergencyInfo('${x.id}')">×</button></div>`).join(''):'<div class="tiny">No emergency information added.</div>'}
 async function addEmergencyInfo(){let label=emLabel.value.trim(),value=emValue.value.trim();if(!label||!value)return;let {error}=await sb.from('trip_emergency_info').insert({trip_id:activeTrip.id,label,value,created_by:user.id,sort_order:cloud.emergency.length});if(error)return alert(error.message);emLabel.value=emValue.value=''}
 async function deleteEmergencyInfo(id){let {error}=await sb.from('trip_emergency_info').delete().eq('id',id);if(error)alert(error.message)}
 function safeFileName(n){return n.replace(/[^a-zA-Z0-9._-]+/g,'_').slice(-120)}
 async function uploadTripDocument(){let f=docFile.files?.[0];if(!f)return alert('Choose a file first.');if(f.size>10*1024*1024)return alert('Maximum file size is 10 MB.');let path=`${activeTrip.id}/${user.id}/${Date.now()}_${safeFileName(f.name)}`;let up=await sb.storage.from('trip-documents').upload(path,f,{upsert:false,contentType:f.type||undefined});if(up.error)return alert(up.error.message);let {error}=await sb.from('trip_documents').insert({trip_id:activeTrip.id,file_name:f.name,storage_path:path,mime_type:f.type||null,uploaded_by:user.id});if(error)return alert(error.message);docFile.value=''}
-function renderDocuments(){if(typeof documentList==='undefined')return;documentList.innerHTML=cloud.documents.length?cloud.documents.map(x=>`<div class="docItem"><b>${x.file_name}</b><div class="actions" style="margin-top:6px"><button class="secondary" onclick="openTripDocument('${x.storage_path}')">Open</button><button class="danger iconbtn" onclick="deleteTripDocument('${x.id}','${x.storage_path}')">×</button></div></div>`).join(''):'<div class="tiny">No documents uploaded.</div>'}
+function renderDocuments(){if(typeof documentList==='undefined')return;documentList.innerHTML=cloud.documents.length?cloud.documents.map(x=>`<div class="docItem"><b>${x.file_name}</b><div class="actions" style="margin-top:6px"><button class="secondary" onclick="openTripDocument('${x.storage_path}')">Open</button><button class="danger smallIconBtn" onclick="deleteTripDocument('${x.id}','${x.storage_path}')">×</button></div></div>`).join(''):'<div class="tiny">No documents uploaded.</div>'}
 async function openTripDocument(path){let {data,error}=await sb.storage.from('trip-documents').createSignedUrl(path,300);if(error)return alert(error.message);window.open(data.signedUrl,'_blank')}
 async function deleteTripDocument(id,path){if(!confirm('Delete this document?'))return;let r=await sb.storage.from('trip-documents').remove([path]);if(r.error)return alert(r.error.message);let {error}=await sb.from('trip_documents').delete().eq('id',id);if(error)return alert(error.message);cloud.documents=cloud.documents.filter(x=>x.id!==id);renderDocuments()}
 function semver(v){return String(v).split('.').map(Number)}
@@ -566,7 +604,9 @@ async function refreshCloud(){await loadTrips();if(activeTrip)await loadCloudDat
 function setFont(v){document.documentElement.style.setProperty('--fs',v);localStorage.setItem('v6font',v)}
 sb.auth.onAuthStateChange((event,session)=>{if(session?.user&&!user)enterApp(session.user);if(!session?.user&&user)location.reload()});
 (async()=>{let {data}=await sb.auth.getSession();if(data.session?.user)await enterApp(data.session.user);let f=localStorage.getItem('v6font');if(f){fontSize.value=f;setFont(f)}})();
-// V6.7.4: predictable PWA updates. HTML is network-first in sw.js.
+if('serviceWorker'in navigator)registerOurTripsServiceWorker();
+
+// V6.3: predictable PWA updates. HTML is network-first in sw.js.
 let pendingOurTripsWorker = null;
 function showOurTripsUpdate(worker){
   pendingOurTripsWorker = worker || null;
@@ -596,14 +636,8 @@ async function registerOurTripsServiceWorker(){
 document.addEventListener('DOMContentLoaded', ()=>{
   const b=document.getElementById('applyAppUpdate');
   if(b) b.addEventListener('click', ()=>{
-    b.disabled=true;
-    b.textContent='Updating…';
-    if(pendingOurTripsWorker){
-      pendingOurTripsWorker.postMessage({type:'SKIP_WAITING'});
-      setTimeout(()=>location.reload(),1800);
-    }else{
-      location.reload();
-    }
+    if(pendingOurTripsWorker) pendingOurTripsWorker.postMessage({type:'SKIP_WAITING'});
+    else location.reload();
   });
   registerOurTripsServiceWorker();
 });

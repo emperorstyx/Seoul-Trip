@@ -1,11 +1,15 @@
-# Our Trips V6.7.4 — PWA Update Button Fix
+# Our Trips V6.8 — Mobile First
 
-Fixes:
-- `Update now` button now works.
-- Service worker handles `SKIP_WAITING`.
-- Button shows `Updating…` after tapping.
-- Fallback reload added if controller switch is slow.
-- Removed duplicate service-worker registration.
-- Cache bumped to `our-trips-v6.7.4`.
+Changes:
+- More mobile-friendly spacing, buttons, modals, navigation, and cards.
+- Compact delete buttons across the app.
+- Countdown card disappears after the trip is complete.
+- Spend currencies: MYR, SGD, KRW, JPY, IDR, USD.
+- Add Place flow: Area/City first, then Place Name.
+- Area search narrows the place search.
+- Add Activity location autocomplete.
+- Saved Place auto-fills its location in Add Activity.
+- Trip calendar button opens trip edit so dates/duration can be changed.
+- Service-worker cache bumped to V6.8.
 
-No Supabase SQL changes required.
+No new Supabase SQL is required.
