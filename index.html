@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2456aa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Our Trips">
-<title>Our Trips V6.9.1</title>
+<title>Our Trips V6.10</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -209,6 +209,19 @@ button,.btn{min-height:var(--tap)}
 .lineIcon{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
 .bottom .lineIcon{display:block;width:19px;height:19px;margin:0 auto 2px}
 .dotsIcon circle{fill:currentColor;stroke:none}
+
+/* V6.10 consolidated UI */
+:root{--font-body:"Avenir Next","Segoe UI",Arial,sans-serif;--font-head:"Avenir Next Rounded","Nunito Sans","Avenir Next","Segoe UI",sans-serif}
+body,input,select,textarea,button{font-family:var(--font-body)}
+h1,h2,h3,.brand{font-family:var(--font-head);letter-spacing:-.015em}
+.miniToggle{width:36px!important;height:20px!important;min-width:36px!important;min-height:20px!important;padding:0!important;border:0!important;border-radius:999px!important;background:#cbd5e1!important;position:relative!important;box-shadow:none!important}
+.miniToggle:after{content:""!important;position:absolute!important;width:16px!important;height:16px!important;left:2px!important;top:2px!important;background:#fff!important;border-radius:50%!important;box-shadow:0 1px 2px rgba(0,0,0,.12)!important;transition:.18s!important}
+.miniToggle.on{background:var(--p)!important}.miniToggle.on:after{left:18px!important}
+.mapBtn{display:inline-flex!important;align-items:center!important;gap:5px!important;height:34px!important;min-height:34px!important;padding:0 10px!important;border-radius:10px!important;font-size:.86rem!important;font-weight:700!important;text-decoration:none!important;background:transparent!important;color:var(--p)!important;border:1px solid var(--line)!important;box-shadow:none!important}
+.mapBtn:before{content:"⌖";font-size:.9rem}.stopMore{width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border-radius:10px!important}
+.contextMenu{position:fixed;z-index:10000;min-width:155px;padding:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 38px rgba(0,0,0,.18)}
+.contextMenu button{width:100%;min-height:40px;justify-content:flex-start;border:0;background:transparent;box-shadow:none}.contextMenu .ctxDelete{color:#d92f4a}
+
 </style>
 </head>
 <body>
@@ -300,7 +313,7 @@ button,.btn{min-height:var(--tap)}
 <div class="card"><h2>☁️ App & Cloud</h2>
 <div class="cloudAbout">
 <div><b>Cloud Sync</b><div class="tiny" id="accountInfo"></div><div style="margin-top:8px"><span class="syncDot ok"></span> Supabase connected</div><button class="secondary" style="margin-top:8px" onclick="refreshCloud()">Refresh Cloud</button></div>
-<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.9.1</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
+<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.10</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
 </div>
 </div>
 
@@ -364,7 +377,7 @@ button,.btn{min-height:var(--tap)}
 const SUPABASE_URL='https://pbyfokktzpoufsiedqxj.supabase.co';
 const SUPABASE_KEY='sb_publishable_RPb5sSnVAtPJIWCp1KBZEA_XWv8V-Or';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const APP_VERSION='6.9.1';
+const APP_VERSION='6.10';
 let authMode='signin',user=null,trips=[],activeTrip=null,
 cloud={itinerary:[],places:[],expenses:[],checks:[],members:[],locations:[],emergency:[],documents:[]},
 filter='All',checkView='mine',realtime=null,map,mapMarkers=[],locationWatch=null,fx={MYR:1},fxDate='',
@@ -517,7 +530,7 @@ function renderEmptyTripDays(){
   }).join(''):`<div class="card"><p class="muted">No trip day for today.</p></div>`;
 }
 
-function renderItinerary(){todayViewBtn.classList.toggle('active',tripView==='today');allViewBtn.classList.toggle('active',tripView==='all');let ds=groupDays(),today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));if(!cloud.itinerary.length){renderEmptyTripDays();return}if(tripView==='today')ds=ds.filter(d=>d.date===today);window.days.innerHTML=ds.length?ds.map(d=>`<div class="card"><div class="dayHead"><div><span class="pill">${d.date}${d.date===today?' · TODAY':''}</span><h2>${d.title}</h2></div><button class="primary" onclick="openDayActivity('${d.date}',this.dataset.title)" data-title="${escapeHtml(d.title)}">+ Activity</button></div>${d.items.map(a=>`<div class="activity ${a.completed?'doneActivity':''}"><input class="activityCheck" type="checkbox" ${a.completed?'checked':''} onchange="toggleActivityDone('${a.id}',this.checked)"><b>${String(a.activity_time||'').slice(0,5)||'—'} · ${a.title}</b><div class="muted">${a.area||''}</div>${a.notes?`<div class="tiny">📝 ${a.notes}</div>`:''}<div class="actions" style="margin-top:7px">${a.area?`<a class="secondary mapBtn" target="_blank" href="${navUrl(a.title,a.area)}">Map</a>`:''}${a.completed?`<button class="secondary" onclick="toggleActivityDone('${a.id}',false)">↩ Undo</button>`:''}<button class="secondary" onclick="editCloudStop('${a.id}')">Edit</button><button class="danger smallIconBtn" onclick="deleteCloudStop('${a.id}')" aria-label="Delete" title="Delete">🗑</button></div></div>`).join('')}</div>`).join(''):`<div class="card"><p class="muted">${tripView==='today'?'No activities for today.':'No itinerary yet.'}</p></div>`}
+function renderItinerary(){todayViewBtn.classList.toggle('active',tripView==='today');allViewBtn.classList.toggle('active',tripView==='all');let ds=groupDays(),today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));if(!cloud.itinerary.length){renderEmptyTripDays();return}if(tripView==='today')ds=ds.filter(d=>d.date===today);window.days.innerHTML=ds.length?ds.map(d=>`<div class="card"><div class="dayHead"><div><span class="pill">${d.date}${d.date===today?' · TODAY':''}</span><h2>${d.title}</h2></div><button class="primary" onclick="openDayActivity('${d.date}',this.dataset.title)" data-title="${escapeHtml(d.title)}">+ Activity</button></div>${d.items.map(a=>`<div class="activity ${a.completed?'doneActivity':''}"><input class="activityCheck" type="checkbox" ${a.completed?'checked':''} onchange="toggleActivityDone('${a.id}',this.checked)"><b>${String(a.activity_time||'').slice(0,5)||'—'} · ${a.title}</b><div class="muted">${a.area||''}</div>${a.notes?`<div class="tiny">📝 ${a.notes}</div>`:''}<div class="actions" style="margin-top:7px">${a.area?`<a class="secondary mapBtn" target="_blank" href="${navUrl(a.title,a.area)}">Map</a><button class="secondary stopMore" aria-label="More actions" onclick="openStopMenu(event,\'${a.id}\')">•••</button>`:''}${a.completed?`<button class="secondary" onclick="toggleActivityDone('${a.id}',false)">↩ Undo</button>`:''}</div></div>`).join('')}</div>`).join(''):`<div class="card"><p class="muted">${tripView==='today'?'No activities for today.':'No itinerary yet.'}</p></div>`}
 async function toggleActivityDone(id,v){let {error}=await sb.from('itinerary').update({completed:v}).eq('id',id);if(error)alert(error.message)}
 function setTripView(v){tripView=v;renderItinerary()}
 async function addCloudStop(){let date=prompt('Date (YYYY-MM-DD)',activeTrip.start_date);if(!date)return;let dayTitle=prompt('Day title','Day plan')||'Day plan',title=prompt('Place / activity');if(!title)return;let time=prompt('Time (HH:MM)','10:00')||null,area=prompt('Area',activeTrip.city)||'',notes=prompt('Notes (optional)','')||'',same=cloud.itinerary.filter(x=>x.day_date===date),sort=same.length?Math.max(...same.map(x=>x.sort_order||0))+1:0;let {error}=await sb.from('itinerary').insert({trip_id:activeTrip.id,day_date:date,day_title:dayTitle,activity_time:time,title,area,notes,completed:false,sort_order:sort});if(error)alert(error.message)}
@@ -583,6 +596,16 @@ async function croppedProfileBlob(){if(!profileImageData)return null;let img=new
 async function saveProfile(){let m=cloud.members.find(x=>x.user_id===user.id),name=profileName.value.trim()||'Traveller',avatar=m?.avatar_url||null,blob=await croppedProfileBlob();if(blob){let path=`${user.id}/${Date.now()}.jpg`,up=await sb.storage.from('avatars').upload(path,blob,{contentType:'image/jpeg'});if(up.error)return alert(up.error.message);avatar=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl}let {error}=await sb.from('trip_members').update({display_name:name,avatar_url:avatar}).eq('trip_id',activeTrip.id).eq('user_id',user.id);if(error)return alert(error.message);profileModal.classList.remove('open');await loadCloudData()}
 async function removeProfilePicture(){let {error}=await sb.from('trip_members').update({avatar_url:null}).eq('trip_id',activeTrip.id).eq('user_id',user.id);if(error)return alert(error.message);profileImageData=null;cropWrap.classList.add('hidden');await loadCloudData();alert('Profile picture removed.')}
 
+
+
+function openStopMenu(ev,id){
+ ev.stopPropagation();document.getElementById('stopContextMenu')?.remove();
+ let m=document.createElement('div');m.id='stopContextMenu';m.className='contextMenu';
+ m.innerHTML=`<button onclick="editCloudStop('${id}');this.parentElement.remove()">Edit</button><button class="ctxDelete" onclick="if(confirm('Delete this activity?'))deleteCloudStop('${id}');this.parentElement.remove()">Delete</button>`;
+ document.body.appendChild(m);let r=ev.currentTarget.getBoundingClientRect();
+ m.style.left=Math.max(8,Math.min(innerWidth-163,r.right-155))+'px';m.style.top=Math.min(innerHeight-m.offsetHeight-8,r.bottom+6)+'px';
+ setTimeout(()=>document.addEventListener('click',()=>m.remove(),{once:true}),0)
+}
 
 let areaSearchTimer=null,placeNameSearchTimer=null,activityAreaTimer=null;
 async function geoSearch(q,limit=6){
