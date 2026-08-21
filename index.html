@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2456aa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Our Trips">
-<title>Our Trips V6.7.2</title>
+<title>Our Trips V6.7.3</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -208,7 +208,7 @@ body.dark .chipScroll{background:transparent}
 </section>
 
 
-<section id="places"><div class="triphead"><h2>📍 Places</h2><button class="primary" onclick="placeModal.classList.add('open')">+ Add</button></div><div class="tabs" id="filters"></div><div class="card"><div id="placeList"></div></div></section>
+<section id="places"><div class="sectionHead"><h2>📍 Places</h2><button class="primary compactAdd" onclick="placeModal.classList.add('open')">+ Add Place</button></div><div class="tabs chipScroll" id="filters"></div><div class="card"><div id="placeList"></div></div></section>
 
 <section id="spend"><h2>💰 Spend</h2>
 <div class="card"><div class="row"><input id="ename" placeholder="Item"><input id="eamt" type="number" step=".01" placeholder="Amount"></div>
@@ -253,7 +253,7 @@ body.dark .chipScroll{background:transparent}
 <div class="card"><h2>☁️ App & Cloud</h2>
 <div class="cloudAbout">
 <div><b>Cloud Sync</b><div class="tiny" id="accountInfo"></div><div style="margin-top:8px"><span class="syncDot ok"></span> Supabase connected</div><button class="secondary" style="margin-top:8px" onclick="refreshCloud()">Refresh Cloud</button></div>
-<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.7.2</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
+<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.7.3</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
 </div>
 </div>
 
@@ -278,7 +278,7 @@ body.dark .chipScroll{background:transparent}
 <div class="row"><div class="formGroup"><label>START</label><input id="tstart" type="date"></div><div class="formGroup"><label>END</label><input id="tend" type="date"></div></div>
 <div class="actions"><button class="primary" onclick="createCloudTrip()">Create Trip</button><button class="secondary" onclick="tripModal.classList.remove('open')">Cancel</button></div></div></div>
 
-<div id="placeModal"<div id="placeModal" class="modalbg"><div class="modal"><h2>Add Place</h2>
+<div id="placeModal" class="modalbg"><div class="modal"><h2>Add Place</h2>
 <div class="row"><input id="pname" placeholder="Search place / restaurant / stay" oninput="schedulePlaceSearch()"><select id="ptype"><option>Restaurant</option><option>Shopping</option><option>Attraction</option><option>Stay</option><option>Other</option></select></div>
 <div id="placeSuggest" class="suggestBox hidden"></div><div class="row"><input id="parea" placeholder="Area / address"><select id="phalal"><option>Halal</option><option>Muslim-friendly</option><option>Check ingredients</option><option>Unknown</option><option>Not applicable</option></select></div>
 <textarea id="pnote" placeholder="Notes / must try"></textarea>
@@ -304,6 +304,7 @@ body.dark .chipScroll{background:transparent}
 <div class="actions"><button class="primary" onclick="saveTripEdit()">Save Changes</button><button class="secondary" onclick="editTripModal.classList.remove('open')">Cancel</button></div>
 </div></div>
 
+<div id="editActivityModal" class="modalbg"><div class="modal"><h2>✨ Edit Activity</h2><input id="eaid" type="hidden"><div class="formGroup"><label>ACTIVITY</label><input id="eatitle"></div><div class="row"><div class="formGroup"><label>TIME</label><input id="eatime" type="time"></div><div class="formGroup"><label>AREA / LOCATION</label><input id="eaarea"></div></div><div class="formGroup"><label>NOTES</label><textarea id="eanotes"></textarea></div><div class="actions"><button class="primary" onclick="saveActivityEdit()">Save Changes</button><button class="secondary" onclick="editActivityModal.classList.remove('open')">Cancel</button></div></div></div>
 <div id="profileModal" class="modalbg"><div class="modal"><h2>👤 My Profile</h2>
 <div class="formGroup"><label>DISPLAY NAME</label><input id="profileName"></div>
 <div class="formGroup"><label>PROFILE PICTURE</label><input id="profileFile" type="file" accept="image/*" onchange="loadProfileCrop(event)"></div>
@@ -315,7 +316,7 @@ body.dark .chipScroll{background:transparent}
 const SUPABASE_URL='https://pbyfokktzpoufsiedqxj.supabase.co';
 const SUPABASE_KEY='sb_publishable_RPb5sSnVAtPJIWCp1KBZEA_XWv8V-Or';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const APP_VERSION='6.7.2';
+const APP_VERSION='6.7.3';
 let authMode='signin',user=null,trips=[],activeTrip=null,
 cloud={itinerary:[],places:[],expenses:[],checks:[],members:[],locations:[],emergency:[],documents:[]},
 filter='All',checkView='mine',realtime=null,map,mapMarkers=[],locationWatch=null,fx={MYR:1},fxDate='',
@@ -409,7 +410,18 @@ async function importSeoul2026(){
   }
 }
 
-async function createCloudTrip(){if(!tname.value||!tcountry.value||!tcity.value||!tstart.value||!tend.value)return alert('Fill trip name, country, city and dates.');let payload={name:tname.value,country:tcountry.value,city:tcity.value,currency:tcurrency.value||'MYR',start_date:tstart.value,end_date:tend.value,timezone:inferTimezone(tcountry.value,tcity.value),created_by:user.id};let {data,error}=await sb.from('trips').insert(payload).select().single();if(error)return alert(error.message);tripModal.classList.remove('open');await loadTrips();await openCloudTrip(data.id)}
+async function createCloudTrip(){
+ if(!tname.value.trim()||!tcity.value.trim()||!tstart.value||!tend.value)return alert('Fill trip name, destination and dates.');
+ let city=tcity.dataset.city||tcity.value.split(',')[0].trim();
+ let country=tcountry.value||tcity.value.split(',').slice(-1)[0].trim()||'Malaysia';
+ let currency=tcurrency.value||currencyFor(country);
+ let timezone=ttimezone.value||tcity.dataset.timezone||inferTimezone(country,city);
+ let payload={name:tname.value.trim(),country,city,currency,start_date:tstart.value,end_date:tend.value,timezone,created_by:user.id};
+ let {data,error}=await sb.from('trips').insert(payload).select().single();
+ if(error)return alert(error.message);
+ tripModal.classList.remove('open');
+ await loadTrips(); await openCloudTrip(data.id);
+}
 async function editTrip(id){let t=trips.find(x=>x.id===id);if(!t)return;etid.value=id;etname.value=t.name||'';etcity.value=[t.city,t.country].filter(Boolean).join(', ');etcountry.value=t.country||'';etcurrency.value=t.currency||currencyFor(t.country);ettimezone.value=t.timezone||inferTimezone(t.country,t.city);etstart.value=t.start_date||'';etend.value=t.end_date||'';editTripModal.classList.add('open')}
 async function saveTripEdit(){let id=etid.value,t=trips.find(x=>x.id===id);if(!t)return;let city=etcity.dataset.city||etcity.value.split(',')[0].trim(),country=etcountry.value||t.country||etcity.value.split(',').slice(-1)[0].trim();let payload={name:etname.value.trim()||t.name,city,country,currency:etcurrency.value||currencyFor(country),timezone:ettimezone.value||inferTimezone(country,city),start_date:etstart.value,end_date:etend.value};let {error}=await sb.from('trips').update(payload).eq('id',id);if(error)return alert(error.message);editTripModal.classList.remove('open');await loadTrips();if(activeTrip?.id===id){activeTrip=trips.find(x=>x.id===id);renderAll()}}
 async function deleteTrip(id){let t=trips.find(x=>x.id===id);if(!t)return;if(!confirm(`Delete "${t.name}"?
@@ -440,20 +452,20 @@ function tripDates(){
   return out
 }
 function openActivityForDate(date){
-  if(typeof openActivityModal==='function')openActivityModal();
-  setTimeout(()=>{let el=document.getElementById('adate')||document.getElementById('activityDate');if(el)el.value=date},0)
+  openDayActivity(date,'Day '+(tripDates().indexOf(date)+1));
 }
 function renderEmptyTripDays(){
   let dates=tripDates();
-  if(!dates.length){itinerary.innerHTML='<div class="card muted">Trip dates are missing. Edit the trip to add dates.</div>';return}
-  itinerary.innerHTML=dates.map((date,i)=>`<div class="card"><div class="dayHead"><div><div class="pill">${date}</div><h2>Day ${i+1}</h2></div><button class="primary compactAdd" onclick="openActivityForDate('${date}')">+ Activity</button></div><div class="muted" style="margin-top:14px">Nothing planned yet.</div></div>`).join('')
+  if(!dates.length){days.innerHTML='<div class="card muted">Trip dates are missing. Edit the trip to add dates.</div>';return}
+  days.innerHTML=dates.map((date,i)=>`<div class="card"><div class="dayHead"><div><div class="pill">${date}</div><h2>Day ${i+1}</h2></div><button class="primary compactAdd" onclick="openActivityForDate('${date}')">+ Activity</button></div><div class="muted" style="margin-top:14px">Nothing planned yet.</div></div>`).join('')
 }
 
-function renderItinerary(){todayViewBtn.classList.toggle('active',tripView==='today');allViewBtn.classList.toggle('active',tripView==='all');let ds=groupDays(),today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));if(tripView==='today')ds=ds.filter(d=>d.date===today);window.days.innerHTML=ds.length?ds.map(d=>`<div class="card"><div class="dayHead"><div><span class="pill">${d.date}${d.date===today?' · TODAY':''}</span><h2>${d.title}</h2></div><button class="primary" onclick="openDayActivity('${d.date}',this.dataset.title)" data-title="${escapeHtml(d.title)}">+ Activity</button></div>${d.items.map(a=>`<div class="activity ${a.completed?'doneActivity':''}"><input class="activityCheck" type="checkbox" ${a.completed?'checked':''} onchange="toggleActivityDone('${a.id}',this.checked)"><b>${String(a.activity_time||'').slice(0,5)||'—'} · ${a.title}</b><div class="muted">${a.area||''}</div>${a.notes?`<div class="tiny">📝 ${a.notes}</div>`:''}<div class="actions" style="margin-top:7px">${a.area?`<a class="btn" target="_blank" href="${navUrl(a.title,a.area)}">Map</a>`:''}${a.completed?`<button class="secondary" onclick="toggleActivityDone('${a.id}',false)">↩ Undo</button>`:''}<button class="secondary" onclick="editCloudStop('${a.id}')">Edit</button><button class="danger iconbtn" onclick="deleteCloudStop('${a.id}')">×</button></div></div>`).join('')}</div>`).join(''):`<div class="card"><p class="muted">${tripView==='today'?'No activities for today.':'No itinerary yet.'}</p></div>`}
+function renderItinerary(){todayViewBtn.classList.toggle('active',tripView==='today');allViewBtn.classList.toggle('active',tripView==='all');let ds=groupDays(),today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));if(!cloud.itinerary.length){renderEmptyTripDays();return;}if(tripView==='today')ds=ds.filter(d=>d.date===today);window.days.innerHTML=ds.length?ds.map(d=>`<div class="card"><div class="dayHead"><div><span class="pill">${d.date}${d.date===today?' · TODAY':''}</span><h2>${d.title}</h2></div><button class="primary" onclick="openDayActivity('${d.date}',this.dataset.title)" data-title="${escapeHtml(d.title)}">+ Activity</button></div>${d.items.map(a=>`<div class="activity ${a.completed?'doneActivity':''}"><input class="activityCheck" type="checkbox" ${a.completed?'checked':''} onchange="toggleActivityDone('${a.id}',this.checked)"><b>${String(a.activity_time||'').slice(0,5)||'—'} · ${a.title}</b><div class="muted">${a.area||''}</div>${a.notes?`<div class="tiny">📝 ${a.notes}</div>`:''}<div class="actions" style="margin-top:7px">${a.area?`<a class="btn" target="_blank" href="${navUrl(a.title,a.area)}">Map</a>`:''}${a.completed?`<button class="secondary" onclick="toggleActivityDone('${a.id}',false)">↩ Undo</button>`:''}<button class="secondary" onclick="editCloudStop('${a.id}')">Edit</button><button class="danger iconbtn" onclick="deleteCloudStop('${a.id}')">×</button></div></div>`).join('')}</div>`).join(''):`<div class="card"><p class="muted">${tripView==='today'?'No activities for today.':'No itinerary yet.'}</p></div>`}
 async function toggleActivityDone(id,v){let {error}=await sb.from('itinerary').update({completed:v}).eq('id',id);if(error)alert(error.message)}
 function setTripView(v){tripView=v;renderItinerary()}
 async function addCloudStop(){let date=prompt('Date (YYYY-MM-DD)',activeTrip.start_date);if(!date)return;let dayTitle=prompt('Day title','Day plan')||'Day plan',title=prompt('Place / activity');if(!title)return;let time=prompt('Time (HH:MM)','10:00')||null,area=prompt('Area',activeTrip.city)||'',notes=prompt('Notes (optional)','')||'',same=cloud.itinerary.filter(x=>x.day_date===date),sort=same.length?Math.max(...same.map(x=>x.sort_order||0))+1:0;let {error}=await sb.from('itinerary').insert({trip_id:activeTrip.id,day_date:date,day_title:dayTitle,activity_time:time,title,area,notes,completed:false,sort_order:sort});if(error)alert(error.message)}
-async function editCloudStop(id){let a=cloud.itinerary.find(x=>x.id===id);if(!a)return;let title=prompt('Place / activity',a.title);if(title===null)return;let time=prompt('Time',String(a.activity_time||'').slice(0,5));if(time===null)return;let area=prompt('Area',a.area||'');if(area===null)return;let notes=prompt('Notes',a.notes||'');if(notes===null)return;let {error}=await sb.from('itinerary').update({title,activity_time:time||null,area,notes}).eq('id',id);if(error)alert(error.message)}
+function editCloudStop(id){let a=cloud.itinerary.find(x=>x.id===id);if(!a)return;eaid.value=id;eatitle.value=a.title||'';eatime.value=String(a.activity_time||'').slice(0,5);eaarea.value=a.area||'';eanotes.value=a.notes||'';editActivityModal.classList.add('open')}
+async function saveActivityEdit(){let id=eaid.value;if(!id||!eatitle.value.trim())return;let {error}=await sb.from('itinerary').update({title:eatitle.value.trim(),activity_time:eatime.value||null,area:eaarea.value.trim(),notes:eanotes.value.trim()}).eq('id',id);if(error)return alert(error.message);editActivityModal.classList.remove('open')}
 async function deleteCloudStop(id){if(confirm('Delete this stop?')){let {error}=await sb.from('itinerary').delete().eq('id',id);if(error)alert(error.message)}}
 function renderPlaces(){let cats=['All','Restaurant','Shopping','Attraction','Stay','Other'];filters.innerHTML=cats.map(c=>`<button class="${c===filter?'active':''}" onclick="filter='${c}';renderPlaces()">${c}</button>`).join('');let list=filter==='All'?cloud.places:cloud.places.filter(p=>{
       if(filter==='Restaurant') return ['Restaurant','Food','Café','Cafe'].includes(p.category);
