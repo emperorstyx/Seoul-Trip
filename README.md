@@ -1,15 +1,28 @@
-# Our Trips V6.8 — Mobile First
+# Our Trips V6.9.1 — Verified Consolidated Build
 
-Changes:
-- More mobile-friendly spacing, buttons, modals, navigation, and cards.
-- Compact delete buttons across the app.
-- Countdown card disappears after the trip is complete.
-- Spend currencies: MYR, SGD, KRW, JPY, IDR, USD.
-- Add Place flow: Area/City first, then Place Name.
-- Area search narrows the place search.
-- Add Activity location autocomplete.
-- Saved Place auto-fills its location in Add Activity.
-- Trip calendar button opens trip edit so dates/duration can be changed.
-- Service-worker cache bumped to V6.8.
+I audited the previously supplied V6.9 package and corrected issues that remained.
+
+Verified/fixed:
+- Create Trip no longer requires a hidden Country field.
+- Destination search uses Nominatim results.
+- Proper Edit Activity modal restored.
+- Actual mini-toggle controls made compact.
+- Bottom navigation and major section headings use consistent line icons.
+- Map/delete actions made smaller and less aggressive.
+- Settings persistence uses one key with legacy fallback.
+- Empty-trip + Activity fix retained.
+- Mobile text-size fix retained.
+- Area-first Add Place search retained.
+- Activity location autocomplete retained.
+- JPY/IDR retained.
+- Completed countdown hide retained.
+- Malaysia single-clock behavior retained.
+- Service worker SKIP_WAITING retained.
+
+Validation:
+- app JavaScript syntax: PASS
+- service-worker syntax: PASS
+- duplicate HTML IDs: none
+- required feature wiring/static checks: PASS
 
 No new Supabase SQL is required.
