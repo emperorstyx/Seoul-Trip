@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2456aa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Our Trips">
-<title>Our Trips V6.11</title>
+<title>Our Trips V6.12</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -224,7 +224,29 @@ h1,h2,h3,.brand{font-family:var(--font-head);letter-spacing:-.015em}
 
 
 /* V6.11 */
-.roleIcon{display:inline-grid;place-items:center;width:20px;height:20px;margin-right:5px;vertical-align:-4px}.roleIcon svg,.spendIcon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.check{gap:8px}.dragHandle{cursor:grab;touch-action:none;user-select:none;width:28px;min-width:28px;color:var(--muted);font-size:20px;text-align:center}.dragHandle:active{cursor:grabbing}.check.dragging{opacity:.55;outline:2px solid var(--p);border-radius:10px}.sharedHint{margin-top:8px}.contextMenu .ctxMap{color:var(--p)}
+.miniSvg{width:18px;height:18px;vertical-align:-4px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs button{display:inline-flex;align-items:center;gap:6px}
+.moreBtn{width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border-radius:10px!important;display:inline-grid!important;place-items:center!important;font-weight:900!important;letter-spacing:1px}
+.check{position:relative}
+.checkleft{min-width:0}
+.dragHandle{width:30px;height:34px;min-height:34px;display:inline-grid;place-items:center;cursor:grab;touch-action:none;user-select:none;border-radius:9px;color:var(--muted);font-size:1.05rem;flex:0 0 30px}
+.dragHandle:active{cursor:grabbing;background:var(--soft)}
+.check.dragging{opacity:.55;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.check.dragTarget{outline:2px dashed var(--p);outline-offset:2px;border-radius:10px}
+.sharedExpenseTag{display:inline-flex;align-items:center;gap:4px;margin-left:5px;padding:2px 6px;border-radius:999px;background:var(--soft);color:var(--p);font-size:.72rem;font-weight:800}
+
+/* V6.12: stable controls and readable sync feedback */
+.syncNotice{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--line);border-radius:14px;background:var(--ps);color:var(--text);font-size:.9rem}
+.syncNotice button{flex:none}
+button:disabled{cursor:wait;opacity:.6}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--p);outline-offset:3px}
+.moreBtn,.dragHandle{min-width:44px!important;min-height:44px!important;width:44px!important;height:44px!important}
+.moreBtn,.dragHandle,.smallIconBtn{touch-action:manipulation}
+.dragHandle{touch-action:none}
+.offlineBanner{max-width:calc(100% - 28px);width:max-content;pointer-events:none}
+.activity b,.place h3,.checkleft span,.docItem b{overflow-wrap:anywhere}
+body.dark .contextMenu{background:var(--card);color:var(--text);border-color:var(--line)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -249,6 +271,7 @@ h1,h2,h3,.brand{font-family:var(--font-head);letter-spacing:-.015em}
 <div id="appShell" class="hidden">
 <header><div class="topbar"><div><div class="brand">❤️ Our Trips</div><div class="tiny"><span id="syncDot" class="syncDot"></span><span id="syncText">Cloud</span> · <span id="tripLabel"></span></div></div><img src="./icon-192.png" class="avatar" onclick="showTab('more')"></div></header>
 <main>
+<div id="syncNotice" class="syncNotice hidden" role="status"><span id="syncNoticeText"></span><button class="secondary" onclick="refreshCloud()">Refresh</button></div>
 <section id="trips" class="show">
 <div class="triphead"><div><span class="pill">SHARED TRAVEL</span><h1>Our Trips</h1><p class="muted">Create a trip or join your partner with a code.</p></div><button class="primary" onclick="tripModal.classList.add('open')">+ New Trip</button></div>
 <div class="card"><h3>Join a trip</h3><div class="row"><input id="joinCode" placeholder="8-character trip code"><input id="joinName" placeholder="Your display name"></div><button class="secondary" onclick="joinTrip()">Join Trip</button></div>
@@ -273,15 +296,15 @@ h1,h2,h3,.brand{font-family:var(--font-head);letter-spacing:-.015em}
 
 <section id="places"><div class="sectionHead"><h2><svg class="lineIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg> Places</h2><button class="primary compactAdd" onclick="placeModal.classList.add('open')">+ Add Place</button></div><div class="tabs chipScroll" id="filters"></div><div class="card"><div id="placeList"></div></div></section>
 
-<section id="spend"><h2><svg class="spendIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 8h6M9 12h6"/></svg> Spend</h2>
-<div class="card"><div class="row"><input id="ename" placeholder="Item"><input id="eamt" type="number" step=".01" placeholder="Amount"></div>
+<section id="spend"><h2><svg class="pageIcon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/><path d="M7 15h4"/></svg> Spend</h2>
+<div class="card" id="expenseForm"><div class="row"><input id="ename" placeholder="Item"><input id="eamt" type="number" step=".01" placeholder="Amount"></div>
 <div class="row"><select id="ecur"></select><select id="ecat"><option>Food</option><option>Shopping</option><option>Transport</option><option>Attraction</option><option>Other</option></select></div>
 <div class="row"><select id="epayer"></select><div></div></div>
-<button class="primary" onclick="addCloudExpense()">Add expense</button><div class="tiny sharedHint">Shared expenses are visible to every member of this trip.</div></div>
+<button class="primary" onclick="addCloudExpense()">Add expense</button></div>
 <div class="card"><div id="totals"></div><div id="expenses"></div></div>
 </section>
 
-<section id="checklists"><h2>☑ Checklist</h2><div class="card"><h2>✅ Checklists</h2><div class="tabs"><button class="active" onclick="pickChecklist('mine',this)"><span class="roleIcon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6"/></svg></span>Mine</button><button onclick="pickChecklist('partner',this)"><span class="roleIcon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c.7-4 3-6 6-6s5.3 2 6 6M15 15c3 0 5 1.7 6 5"/></svg></span>Partner</button><button onclick="pickChecklist('shared',this)"><span class="roleIcon"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c.6-4 2.7-6 6-6s5.4 2 6 6M10 20c.6-4 2.7-6 6-6s5.4 2 6 6"/></svg></span>Shared</button></div><div id="checkAddRow" class="row"><input id="newCheck" placeholder="Add item"><button class="primary" onclick="addCloudCheck()">Add</button></div><div id="checkList"></div></div>
+<section id="checklists"><h2>☑ Checklist</h2><div class="card"><h2>✅ Checklists</h2><div class="tabs"><button class="active" onclick="pickChecklist('mine',this)"><svg class="miniSvg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5.5 19c.8-4 3-6 6.5-6s5.7 2 6.5 6"/></svg> Mine</button><button onclick="pickChecklist('partner',this)"><svg class="miniSvg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5.5 19c.8-4 3-6 6.5-6s5.7 2 6.5 6"/><path d="M17 5.5l2 2 2-2"/></svg> Partner</button><button onclick="pickChecklist('shared',this)"><svg class="miniSvg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="2.5"/><circle cx="16" cy="8" r="2.5"/><path d="M3.5 19c.5-3.4 2.2-5.2 4.5-5.2s4 1.8 4.5 5.2"/><path d="M11.5 19c.5-3.4 2.2-5.2 4.5-5.2s4 1.8 4.5 5.2"/></svg> Shared</button></div><div id="checkAddRow" class="row"><input id="newCheck" placeholder="Add item"><button class="primary" onclick="addCloudCheck()">Add</button></div><div id="checkList"></div></div>
 </section>
 <section id="more"><h2>☰ More</h2>
 
@@ -292,12 +315,12 @@ h1,h2,h3,.brand{font-family:var(--font-head);letter-spacing:-.015em}
 </div>
 
 <div class="card"><h2>🆘 Travel Documents & Emergency</h2>
-<div class="row"><input id="emLabel" placeholder="Label e.g. Emergency contact"><input id="emValue" placeholder="Information / phone / reference"></div>
-<button class="secondary" onclick="addEmergencyInfo()">+ Add information</button>
+<div id="emergencyForm"><div class="row"><input id="emLabel" placeholder="Label e.g. Emergency contact"><input id="emValue" placeholder="Information / phone / reference"></div>
+<button class="secondary" onclick="addEmergencyInfo()">+ Add information</button></div>
 <div id="emergencyList" style="margin-top:8px"></div>
 <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
-<input id="docFile" type="file" accept=".pdf,image/*" style="margin-bottom:8px">
-<button class="primary" onclick="uploadTripDocument()">Upload booking / document</button>
+<div id="documentForm"><input id="docFile" type="file" accept=".pdf,image/*" style="margin-bottom:8px">
+<button class="primary" onclick="uploadTripDocument()">Upload booking / document</button></div>
 <div id="documentList" style="margin-top:8px"></div>
 </div>
 
@@ -315,8 +338,8 @@ h1,h2,h3,.brand{font-family:var(--font-head);letter-spacing:-.015em}
 
 <div class="card"><h2>☁️ App & Cloud</h2>
 <div class="cloudAbout">
-<div><b>Cloud Sync</b><div class="tiny" id="accountInfo"></div><div style="margin-top:8px"><span class="syncDot ok"></span> Supabase connected</div><button class="secondary" style="margin-top:8px" onclick="refreshCloud()">Refresh Cloud</button></div>
-<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.11</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
+<div><b>Cloud Sync</b><div class="tiny" id="accountInfo"></div><div id="cloudStatusDetail" class="tiny" style="margin-top:8px" role="status">Checking connection…</div><button class="secondary" style="margin-top:8px" onclick="refreshCloud()">Refresh Cloud</button></div>
+<div><b>Our Trips</b><div class="tiny">Version <span id="aboutVersion">6.12</span></div><div class="tiny">Cloud database compatibility checked at login.</div></div>
 </div>
 </div>
 
@@ -376,25 +399,85 @@ h1,h2,h3,.brand{font-family:var(--font-head);letter-spacing:-.015em}
 <div class="actions"><button class="primary" onclick="saveProfile()">Save Profile</button><button class="secondary" onclick="removeProfilePicture()">Remove Picture</button><button class="secondary" onclick="profileModal.classList.remove('open')">Cancel</button></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="./trip-core.js?v=6.12"></script>
 <script>
 const SUPABASE_URL='https://pbyfokktzpoufsiedqxj.supabase.co';
 const SUPABASE_KEY='sb_publishable_RPb5sSnVAtPJIWCp1KBZEA_XWv8V-Or';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const APP_VERSION='6.11';
+const sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const APP_VERSION='6.12';
 let authMode='signin',user=null,trips=[],activeTrip=null,
-cloud={itinerary:[],places:[],expenses:[],checks:[],members:[],locations:[],emergency:[],documents:[]},
+cloud=OurTripsCore.emptyCloud(),
 filter='All',checkView='mine',realtime=null,map,mapMarkers=[],locationWatch=null,fx={MYR:1},fxDate='',
 tripView='all',clockTimer=null,
-appSettings=JSON.parse(localStorage.getItem('v69settings')||localStorage.getItem('v67settings')||localStorage.getItem('v64settings')||'{"showProgress":false,"travelWarning":false,"buffer":30,"appearance":"light","theme":"korea"}');
+appSettings=readAppSettings();
+function readAppSettings(){
+ const defaults={showProgress:false,travelWarning:false,buffer:30,appearance:'light',theme:'korea'};
+ try{return {...defaults,...JSON.parse(localStorage.getItem('v69settings')||localStorage.getItem('v67settings')||localStorage.getItem('v64settings')||'{}')}}catch(_){return defaults}
+}
+const actionGuard=OurTripsCore.createActionGuard();
+const draftFields=new Set();
+function clearDraftFields(rootId){const root=document.getElementById(rootId);for(const field of draftFields)if(root?.contains(field))draftFields.delete(field)}
+function hasUnsavedEntries(){return [...draftFields].some(field=>field.isConnected&&(!field.closest('.modalbg')||field.closest('.modalbg').classList.contains('open')))}
+document.addEventListener('input',event=>{const field=event.target;if(field.matches('input:not([type="checkbox"]):not([type="range"]),textarea')&&!field.closest('#authShell'))draftFields.add(field)});
+document.addEventListener('change',event=>{if(event.target.matches('#expenseForm select'))draftFields.add(event.target)});
+window.addEventListener('beforeunload',event=>{if(actionGuard.busy||hasUnsavedEntries()){event.preventDefault();event.returnValue=''}});
+
+let tripSession=0,tripOpenRequest=0,realtimeTimer=null,realtimeState='CLOSED',lastCloudRead=0,cloudFailures=[],enterTask=null,tripListRequest=0,fxRequest=0,weatherRequest=0;
+function setCloudStatus(kind,text,detail=''){
+ syncDot.className='syncDot'+(kind==='ok'?' ok':kind==='offline'?' off':'');
+ syncText.textContent=text;
+ const note=document.getElementById('syncNotice'),line=document.getElementById('syncNoticeText');
+ if(note&&line){line.textContent=detail;note.classList.toggle('hidden',!detail)}
+ const more=document.getElementById('cloudStatusDetail');if(more)more.textContent=detail||text;
+}
+function updateCloudStatus(){
+ if(!navigator.onLine)return setCloudStatus('offline','Offline','Offline. Loaded details remain visible; changes are not saved until you reconnect and tap Save.');
+ if(cloudFailures.length)return setCloudStatus('error','Refresh incomplete','Could not refresh '+cloudFailures.join(', ')+'. Previously loaded details are kept. Try Refresh.');
+ if(realtimeState==='SUBSCRIBED')return setCloudStatus('ok','Up to date');
+ setCloudStatus('waiting',lastCloudRead?'Trip loaded':'Connecting',realtimeState==='CHANNEL_ERROR'||realtimeState==='TIMED_OUT'?'Live updates are interrupted. Tap Refresh to reconnect.':'');
+}
+async function pendingAction(key,rootId,work){
+ return actionGuard.run(key,async()=>{
+  if(!navigator.onLine){alert('You are offline. Your entries are still here; reconnect and tap Save.');return false}
+  const root=document.getElementById(rootId),controls=[...(root?.querySelectorAll('button,input,select,textarea')||[])].map(el=>[el,el.disabled]);
+  controls.forEach(([el])=>el.disabled=true);root?.setAttribute('aria-busy','true');
+  try{return await work()}catch(error){alert('Could not complete this action: '+(error.message||'Connection interrupted. Check the trip before retrying.'));return false}
+  finally{controls.forEach(([el,disabled])=>el.disabled=disabled);root?.removeAttribute('aria-busy')}
+ });
+}
+async function saveChange(key,rootId,mutation,onSaved=()=>{}){
+ const id=activeTrip?.id,session=tripSession;if(!id)return false;
+ return pendingAction(key,rootId,async()=>{
+  const result=await mutation(id);if(result?.error)throw result.error;
+  if(session===tripSession&&id===activeTrip?.id){clearDraftFields(rootId);onSaved();await loadCloudData()}
+  return true;
+ });
+}
+
 function msg(t,bad=false){authMsg.textContent=t;authMsg.style.color=bad?'#b91c1c':'#2456aa'}
 function setAuthMode(m){authMode=m;signinTab.className=m==='signin'?'primary':'secondary';signupTab.className=m==='signup'?'primary':'secondary';nameRow.classList.toggle('hidden',m!=='signup');authSubmit.textContent=m==='signin'?'Sign In':'Create Account';msg('')}
 async function submitAuth(){let email=authEmail.value.trim(),password=authPassword.value,name=authName.value.trim();if(!email||!password)return msg('Enter email and password.',true);authSubmit.disabled=true;try{if(authMode==='signup'){let {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:name||email.split('@')[0]},emailRedirectTo:location.origin+location.pathname}});if(error)throw error;if(!data.session)msg('Account created. Check your email to confirm, then sign in.');else await enterApp(data.user)}else{let {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;await enterApp(data.user)}}catch(e){msg(e.message,true)}finally{authSubmit.disabled=false}}
 async function signOut(){stopLocation();await sb.auth.signOut();location.reload()}
-async function enterApp(u){user=u;authShell.classList.add('hidden');appShell.classList.remove('hidden');accountInfo.textContent=user.email;syncDot.classList.add('ok');syncText.textContent='Cloud connected';await checkAppVersion();await loadTrips();renderSettings();showTab('trips')}
+async function enterApp(u){
+ if(enterTask)return enterTask;
+ user=u;
+ enterTask=(async()=>{authShell.classList.add('hidden');appShell.classList.remove('hidden');accountInfo.textContent=user.email;setCloudStatus('waiting','Connecting');await checkAppVersion();await loadTrips();renderSettings();showTab('trips')})();
+ try{return await enterTask}finally{enterTask=null}
+}
 function showTab(id){document.querySelectorAll('#appShell section').forEach(s=>s.classList.remove('show'));document.getElementById(id).classList.add('show');bottomNav.classList.toggle('hidden',id==='trips');document.querySelectorAll('#bottomNav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));if(id==='home'){loadWeather();setTimeout(()=>renderMap(),120)}}
-async function loadTrips(){let {data,error}=await sb.from('trips').select('*').order('start_date',{ascending:true});if(error){alert(error.message);return}trips=data||[];renderTrips()}
+async function loadTrips(){
+ const request=++tripListRequest;
+ try{
+  const {data,error}=await sb.from('trips').select('*').order('start_date',{ascending:true});
+  if(request!==tripListRequest)return false;if(error)throw error;
+  trips=data||[];renderTrips();
+  if(activeTrip){const updated=trips.find(t=>t.id===activeTrip.id);if(updated){activeTrip=updated;tripLabel.textContent=updated.name}}
+  if(!activeTrip)setCloudStatus('ok','Trips loaded');return true;
+ }catch(error){if(request===tripListRequest)setCloudStatus('error','Refresh failed','Could not load your trips. Previously loaded trips are kept. Tap Refresh to retry.');return false}
+}
+async function copyTripCode(id){const code=trips.find(t=>t.id===id)?.join_code;if(!code)return;try{await navigator.clipboard.writeText(code);alert('Trip code copied')}catch(_){prompt('Copy this trip code:',code)}}
 function flag(c=''){c=c.toLowerCase();return c.includes('korea')?'🇰🇷':c.includes('japan')?'🇯🇵':c.includes('malaysia')?'🇲🇾':c.includes('singapore')?'🇸🇬':c.includes('indonesia')?'🇮🇩':'🌍'}
-function renderTrips(){tripList.innerHTML=trips.length?trips.map(t=>`<div class="card"><div class="triphead"><div class="grow"><div style="font-size:2rem">${flag(t.country)}</div><h2>${t.name}</h2><div class="muted">${t.city||''}, ${t.country||''}</div><div class="tiny">${t.start_date||''} → ${t.end_date||''} · ${t.timezone||inferTimezone(t.country,t.city)}</div></div><span class="pill">Code ${t.join_code}</span></div><div class="actions" style="margin-top:10px"><button class="primary" onclick="openCloudTrip('${t.id}')">Open Trip</button><button class="secondary" onclick="editTrip('${t.id}')">✏️ Edit</button>${t.created_by===user.id?`<button class="danger" onclick="deleteTrip('${t.id}')">🗑 Delete</button>`:''}<button class="secondary" onclick="navigator.clipboard.writeText('${t.join_code}').then(()=>alert('Trip code copied'))">Copy Code</button></div></div>`).join(''):'<div class="card"><p class="muted">No cloud trips yet. Create one, or join your partner with a code.</p></div>'}
+function renderTrips(){tripList.innerHTML=trips.length?trips.map(t=>`<div class="card"><div class="triphead"><div class="grow"><div style="font-size:2rem">${flag(t.country)}</div><h2>${escapeHtml(t.name)}</h2><div class="muted">${escapeHtml(t.city||'')}, ${escapeHtml(t.country||'')}</div><div class="tiny">${t.start_date||''} → ${t.end_date||''} · ${escapeHtml(t.timezone||inferTimezone(t.country,t.city))}</div></div><span class="pill">Code ${escapeHtml(t.join_code)}</span></div><div class="actions" style="margin-top:10px"><button class="primary" onclick="openCloudTrip('${t.id}')">Open Trip</button><button class="secondary" onclick="editTrip('${t.id}')">✏️ Edit</button>${t.created_by===user.id?`<button class="danger" onclick="deleteTrip('${t.id}')">🗑 Delete</button>`:''}<button class="secondary" onclick="copyTripCode('${t.id}')">Copy Code</button></div></div>`).join(''):'<div class="card"><p class="muted">No cloud trips yet. Create one, or join your partner with a code.</p></div>'}
 
 const SEOUL_IMPORT_DAYS=[
 ["2026-11-27","Fly to Korea",[["19:30","Depart Singapore","Changi"]]],
@@ -475,49 +558,82 @@ async function importSeoul2026(){
 }
 
 async function createCloudTrip(){
-let name=tname.value.trim(),raw=tcity.value.trim();
-if(!name||!raw||!tstart.value||!tend.value)return alert('Fill trip name, destination and dates.');
-let city=tcity.dataset.city||raw.split(',')[0].trim();
-let country=tcountry.value||raw.split(',').slice(-1)[0].trim()||'Malaysia';
-let currency=tcurrency.value||currencyFor(country);
-let timezone=ttimezone.value||inferTimezone(country,city);
-let {data,error}=await sb.from('trips').insert({name,country,city,currency,start_date:tstart.value,end_date:tend.value,timezone,created_by:user.id}).select().single();
-if(error)return alert(error.message);
-tripModal.classList.remove('open');
-tname.value=tcity.value=tstart.value=tend.value='';tcountry.value=tcurrency.value=ttimezone.value='';
-await loadTrips();await openCloudTrip(data.id)
+ const name=tname.value.trim(),raw=tcity.value.trim();
+ if(!name||!raw||!tstart.value||!tend.value)return alert('Fill trip name, destination and dates.');
+ if(!OurTripsCore.datesBetween(tstart.value,tend.value).length)return alert('Choose valid dates, with the end on or after the start.');
+ const city=tcity.dataset.city||raw.split(',')[0].trim(),country=tcountry.value||raw.split(',').slice(-1)[0].trim()||'Malaysia';
+ const payload={name,country,city,currency:tcurrency.value||currencyFor(country),start_date:tstart.value,end_date:tend.value,timezone:ttimezone.value||inferTimezone(country,city),created_by:user.id};
+ const id=await pendingAction('create-trip','tripModal',async()=>{
+  const {data,error}=await sb.from('trips').insert(payload).select().single();if(error)throw error;
+  clearDraftFields('tripModal');tripModal.classList.remove('open');tname.value=tcity.value=tstart.value=tend.value=tcountry.value=tcurrency.value=ttimezone.value='';delete tcity.dataset.city;
+  await loadTrips();return data.id;
+ });
+ if(id)await openCloudTrip(id);
 }
-async function editTrip(id){let t=trips.find(x=>x.id===id);if(!t)return;etid.value=id;etname.value=t.name||'';etcity.value=[t.city,t.country].filter(Boolean).join(', ');etcountry.value=t.country||'';etcurrency.value=t.currency||currencyFor(t.country);ettimezone.value=t.timezone||inferTimezone(t.country,t.city);etstart.value=t.start_date||'';etend.value=t.end_date||'';editTripModal.classList.add('open')}
-async function saveTripEdit(){let id=etid.value,t=trips.find(x=>x.id===id);if(!t)return;let city=etcity.dataset.city||etcity.value.split(',')[0].trim(),country=etcountry.value||t.country||etcity.value.split(',').slice(-1)[0].trim();let payload={name:etname.value.trim()||t.name,city,country,currency:etcurrency.value||currencyFor(country),timezone:ettimezone.value||inferTimezone(country,city),start_date:etstart.value,end_date:etend.value};let {error}=await sb.from('trips').update(payload).eq('id',id);if(error)return alert(error.message);editTripModal.classList.remove('open');await loadTrips();if(activeTrip?.id===id){activeTrip=trips.find(x=>x.id===id);renderAll()}}
-async function deleteTrip(id){let t=trips.find(x=>x.id===id);if(!t)return;if(!confirm(`Delete "${t.name}"?
+async function editTrip(id){let t=trips.find(x=>x.id===id);if(!t)return;clearDraftFields('editTripModal');delete etcity.dataset.city;etid.value=id;etname.value=t.name||'';etcity.value=[t.city,t.country].filter(Boolean).join(', ');etcountry.value=t.country||'';etcurrency.value=t.currency||currencyFor(t.country);ettimezone.value=t.timezone||inferTimezone(t.country,t.city);etstart.value=t.start_date||'';etend.value=t.end_date||'';editTripModal.classList.add('open')}
+async function saveTripEdit(){
+ const id=etid.value,t=trips.find(x=>x.id===id);if(!t)return;
+ if(!OurTripsCore.datesBetween(etstart.value,etend.value).length)return alert('Choose valid dates, with the end on or after the start.');
+ const city=etcity.dataset.city||etcity.value.split(',')[0].trim(),country=etcountry.value||t.country||etcity.value.split(',').slice(-1)[0].trim();
+ const payload={name:etname.value.trim()||t.name,city,country,currency:etcurrency.value||currencyFor(country),timezone:ettimezone.value||inferTimezone(country,city),start_date:etstart.value,end_date:etend.value};
+ return pendingAction('edit-trip','editTripModal',async()=>{
+  const {error}=await sb.from('trips').update(payload).eq('id',id);if(error)throw error;
+  clearDraftFields('editTripModal');editTripModal.classList.remove('open');await loadTrips();if(activeTrip?.id===id){renderAll();loadWeather()}return true;
+ });
+}
+async function deleteTrip(id){let t=trips.find(x=>x.id===id);if(!t)return;if(!confirm(`Delete "${escapeHtml(t.name)}"?
 
-This permanently removes its itinerary, places, expenses, checklists, documents and shared locations.`))return;let {error}=await sb.from('trips').delete().eq('id',id);if(error)return alert(error.message);if(activeTrip?.id===id){activeTrip=null;if(realtime){sb.removeChannel(realtime);realtime=null}}await loadTrips();showTab('trips')}
+This permanently removes its itinerary, places, expenses, checklists, documents and shared locations.`))return;let {error}=await sb.from('trips').delete().eq('id',id);if(error)return alert(error.message);if(activeTrip?.id===id){stopLocation();++tripSession;cloudLoader.activate(null);activeTrip=null;if(realtime){sb.removeChannel(realtime);realtime=null}}await loadTrips();showTab('trips')}
 async function joinTrip(){let code=joinCode.value.trim(),name=joinName.value.trim()||user.user_metadata?.display_name||user.email.split('@')[0];if(!code)return;let {data,error}=await sb.rpc('join_trip_by_code',{p_code:code,p_display_name:name});if(error)return alert(error.message);joinCode.value='';await loadTrips();await openCloudTrip(data)}
-async function openCloudTrip(id){activeTrip=trips.find(t=>t.id===id)||null;if(!activeTrip){await loadTrips();activeTrip=trips.find(t=>t.id===id)}if(!activeTrip)return;tripLabel.textContent=activeTrip.name;tripView=isTripToday()?'today':'all';await loadCloudData();subscribeRealtime();renderAll();showTab('home');startClocks()}
-async function loadCloudData(){if(!activeTrip)return;let id=activeTrip.id;let [it,pl,ex,ch,me,lo,em,docs]=await Promise.all([
- sb.from('itinerary').select('*').eq('trip_id',id).order('day_date').order('activity_time',{ascending:true,nullsFirst:false}),
- sb.from('places').select('*').eq('trip_id',id).order('created_at'),
- sb.from('expenses').select('*').eq('trip_id',id).order('created_at',{ascending:false}),
- sb.from('checklists').select('*').eq('trip_id',id).order('sort_order'),
- sb.from('trip_members').select('*').eq('trip_id',id).order('joined_at'),
- sb.from('member_locations').select('*').eq('trip_id',id),
- sb.from('trip_emergency_info').select('*').eq('trip_id',id).order('sort_order'),
- sb.from('trip_documents').select('*').eq('trip_id',id).order('created_at',{ascending:false})
-]);for(let x of [it,pl,ex,ch,me,lo,em,docs])if(x.error)console.warn(x.error);cloud={itinerary:it.data||[],places:pl.data||[],expenses:ex.data||[],checks:ch.data||[],members:me.data||[],locations:lo.data||[],emergency:em.data||[],documents:docs.data||[]};renderAll();await loadFx()}
-function subscribeRealtime(){if(realtime)sb.removeChannel(realtime);if(!activeTrip)return;realtime=sb.channel('trip-'+activeTrip.id);['itinerary','places','expenses','checklists','trip_members','member_locations','trip_emergency_info','trip_documents'].forEach(table=>realtime.on('postgres_changes',{event:'*',schema:'public',table,filter:'trip_id=eq.'+activeTrip.id},()=>loadCloudData()));realtime.subscribe()}
-function navUrl(name,area=''){let q=encodeURIComponent(name+' '+area+' '+(activeTrip?.city||''));return (activeTrip?.country||'').toLowerCase().includes('korea')?'https://map.naver.com/p/search/'+q:'https://www.google.com/maps/search/?api=1&query='+q}
-function groupDays(){let m=new Map();cloud.itinerary.forEach(x=>{let k=(x.day_date||'')+'|'+(x.day_title||'Day');if(!m.has(k))m.set(k,[]);m.get(k).push(x)});let today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));return [...m.entries()].map(([k,items])=>{let [date,title]=k.split('|');items.sort((a,b)=>Number(!!a.completed)-Number(!!b.completed)||timeSort(a.activity_time)-timeSort(b.activity_time)||((a.sort_order||0)-(b.sort_order||0)));return {date,title,items}}).sort((a,b)=>{let rank=d=>d===today?0:(d>today?1:2),r=rank(a.date)-rank(b.date);if(r)return r;return rank(a.date)===2?b.date.localeCompare(a.date):a.date.localeCompare(b.date)})}
-function renderAll(){if(!activeTrip)return;renderHome();renderItinerary();renderPlaces();renderExpenses();renderChecks();renderMembers();renderEmergency();renderDocuments();renderSettings();renderDualClock()}
-function renderHome(){hero.innerHTML=`<span class="pill">${flag(activeTrip.country)} ${activeTrip.country||''}</span><h1>${activeTrip.name}</h1><p class="muted">${activeTrip.start_date||''} → ${activeTrip.end_date||''} · Trip code <b>${activeTrip.join_code}</b></p>`;let today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city)),sd=activeTrip.start_date,ed=activeTrip.end_date;if(today<sd){countdown.textContent=daysBetween(today,sd)+' days';countdown.closest('.card')?.classList.remove('hidden')}
-else if(today<=ed){countdown.textContent='Trip time!';countdown.closest('.card')?.classList.remove('hidden')}
-else{countdown.closest('.card')?.classList.add('hidden')}let currentDay=groupDays().find(d=>d.date===today),candidates=(currentDay?.items||[]).filter(a=>!a.completed);if(!candidates.length)candidates=groupDays().flatMap(d=>d.items).filter(a=>!a.completed);let n=chooseNextActivity(candidates,today);renderSmartNow(n,today);wloc.textContent=(activeTrip.city||'DESTINATION').toUpperCase()+' WEATHER';ecur.innerHTML=[activeTrip.currency,'MYR','SGD','KRW','JPY','IDR','USD'].filter((x,i,a)=>x&&a.indexOf(x)===i).map(x=>`<option>${x}</option>`).join('');populatePayers();renderSpendTotal();renderOptionalProgress(currentDay);renderTripSummary(today)}
-
-function tripDates(){
-  if(!activeTrip?.start_date||!activeTrip?.end_date)return[];
-  let out=[],d=new Date(activeTrip.start_date+'T12:00:00'),end=new Date(activeTrip.end_date+'T12:00:00');
-  while(d<=end&&out.length<60){out.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1)}
-  return out
+async function openCloudTrip(id){
+ if(actionGuard.busy){alert('Please wait for the current save to finish.');return}
+ if(activeTrip&&hasUnsavedEntries()&&!confirm('Switch trips and discard the entries you have not saved?'))return;
+ const request=++tripOpenRequest;
+ let next=trips.find(t=>t.id===id);if(!next){await loadTrips();if(request!==tripOpenRequest)return;next=trips.find(t=>t.id===id)}
+ if(!next)return;
+ stopLocation();clearTimeout(realtimeTimer);if(realtime){sb.removeChannel(realtime);realtime=null}
+ ++tripSession;++fxRequest;++weatherRequest;activeTrip=next;cloud=OurTripsCore.emptyCloud();fx={MYR:1};fxDate='';cloudFailures=[];lastCloudRead=0;realtimeState='CLOSED';
+ cloudLoader.activate(id);tripLabel.textContent=next.name;tripView=isTripToday()?'today':'all';filter='All';checkView='mine';
+ ename.value=eamt.value=newCheck.value=emLabel.value=emValue.value=docFile.value='';ecur.innerHTML=epayer.innerHTML='';draftFields.clear();
+ document.querySelectorAll('.modalbg.open').forEach(modal=>modal.classList.remove('open'));
+ renderAll();showTab('home');smartNowLine.textContent='Loading your trip…';setCloudStatus('waiting','Loading trip');startClocks();subscribeRealtime();
+ await loadCloudData();
 }
+async function readCloudTables(id){
+ return Promise.allSettled([
+  sb.from('itinerary').select('*').eq('trip_id',id).order('day_date').order('activity_time',{ascending:true,nullsFirst:false}),
+  sb.from('places').select('*').eq('trip_id',id).order('created_at'),
+  sb.from('expenses').select('*').eq('trip_id',id).order('created_at',{ascending:false}),
+  sb.from('checklists').select('*').eq('trip_id',id).order('sort_order'),
+  sb.from('trip_members').select('*').eq('trip_id',id).order('joined_at'),
+  sb.from('member_locations').select('*').eq('trip_id',id),
+  sb.from('trip_emergency_info').select('*').eq('trip_id',id).order('sort_order'),
+  sb.from('trip_documents').select('*').eq('trip_id',id).order('created_at',{ascending:false})
+ ]);
+}
+const cloudLoader=OurTripsCore.createScopedLoader(readCloudTables,(results)=>{
+ const merged=OurTripsCore.mergeCloud(cloud,results);cloud=merged.data;
+ const names={checks:'checklists',members:'members',locations:'locations',emergency:'emergency information',documents:'documents'};
+ cloudFailures=merged.failed.map(key=>names[key]||key);lastCloudRead=Date.now();
+ renderAll();updateCloudStatus();loadFx();return !merged.failed.length;
+},()=>{setCloudStatus('error','Refresh failed','Could not refresh the trip. Loaded details are kept. Tap Refresh to retry.')});
+function loadCloudData(){return cloudLoader.refresh()}
+function queueCloudRefresh(){clearTimeout(realtimeTimer);realtimeTimer=setTimeout(()=>{if(activeTrip&&navigator.onLine)loadCloudData()},200)}
+function subscribeRealtime(){
+ if(realtime)sb.removeChannel(realtime);if(!activeTrip)return;
+ const id=activeTrip.id,session=tripSession;realtimeState='CONNECTING';
+ realtime=sb.channel('trip-'+id);
+ ['itinerary','places','expenses','checklists','trip_members','member_locations','trip_emergency_info','trip_documents'].forEach(table=>realtime.on('postgres_changes',{event:'*',schema:'public',table,filter:'trip_id=eq.'+id},()=>{if(session===tripSession)queueCloudRefresh()}));
+ realtime.subscribe(status=>{if(session!==tripSession)return;realtimeState=status;updateCloudStatus();if(status==='SUBSCRIBED')queueCloudRefresh()});
+}
+function navUrl(name,area=''){let q=encodeURIComponent(name+' '+area+' '+(activeTrip?.city||''));return (activeTrip?.country||'').toLowerCase().includes('korea')?'https://map.naver.com/p/search/'+q:'https://www.google.com/maps/search/?api=1&query='+q}
+function groupDays(){return OurTripsCore.buildDays(activeTrip,cloud.itinerary,timeSort)}
+function renderAll(){if(!activeTrip)return;renderHome();renderItinerary();renderPlaces();renderExpenses();renderChecks();renderMembers();renderEmergency();renderDocuments();renderSettings();renderDualClock()}
+function renderHome(){hero.innerHTML=`<span class="pill">${flag(activeTrip.country)} ${escapeHtml(activeTrip.country||'')}</span><h1>${escapeHtml(activeTrip.name)}</h1><p class="muted">${activeTrip.start_date||''} → ${activeTrip.end_date||''} · Trip code <b>${escapeHtml(activeTrip.join_code)}</b></p>`;let today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city)),sd=activeTrip.start_date,ed=activeTrip.end_date;if(today<sd){countdown.textContent=daysBetween(today,sd)+' days';countdown.closest('.card')?.classList.remove('hidden')}
+else if(today<=ed){countdown.textContent='Trip time!';countdown.closest('.card')?.classList.remove('hidden')}
+else{countdown.closest('.card')?.classList.add('hidden')}let currentDay=groupDays().find(d=>d.date===today),candidates=(currentDay?.items||[]).filter(a=>!a.completed);if(!candidates.length)candidates=groupDays().flatMap(d=>d.items).filter(a=>!a.completed);let n=chooseNextActivity(candidates,today);renderSmartNow(n,today);wloc.textContent=(activeTrip.city||'DESTINATION').toUpperCase()+' WEATHER';populateCurrencies();populatePayers();renderSpendTotal();renderOptionalProgress(currentDay);renderTripSummary(today)}
+
+function tripDates(){return OurTripsCore.datesBetween(activeTrip?.start_date,activeTrip?.end_date)}
 function openActivityForDate(date){
   let idx=tripDates().indexOf(date);
   openDayActivity(date,'Day '+(idx>=0?idx+1:1));
@@ -533,58 +649,202 @@ function renderEmptyTripDays(){
   }).join(''):`<div class="card"><p class="muted">No trip day for today.</p></div>`;
 }
 
-function renderItinerary(){todayViewBtn.classList.toggle('active',tripView==='today');allViewBtn.classList.toggle('active',tripView==='all');let ds=groupDays(),today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));if(!cloud.itinerary.length){renderEmptyTripDays();return}if(tripView==='today')ds=ds.filter(d=>d.date===today);window.days.innerHTML=ds.length?ds.map(d=>`<div class="card"><div class="dayHead"><div><span class="pill">${d.date}${d.date===today?' · TODAY':''}</span><h2>${d.title}</h2></div><button class="primary" onclick="openDayActivity('${d.date}',this.dataset.title)" data-title="${escapeHtml(d.title)}">+ Activity</button></div>${d.items.map(a=>`<div class="activity ${a.completed?'doneActivity':''}"><input class="activityCheck" type="checkbox" ${a.completed?'checked':''} onchange="toggleActivityDone('${a.id}',this.checked)"><b>${String(a.activity_time||'').slice(0,5)||'—'} · ${a.title}</b><div class="muted">${a.area||''}</div>${a.notes?`<div class="tiny">📝 ${a.notes}</div>`:''}<div class="actions" style="margin-top:7px"><button class="secondary stopMore" aria-label="More actions" onclick="openStopMenu(event,\'${a.id}\')">•••</button>${a.completed?`<button class="secondary" onclick="toggleActivityDone('${a.id}',false)">↩ Undo</button>`:''}</div></div>`).join('')}</div>`).join(''):`<div class="card"><p class="muted">${tripView==='today'?'No activities for today.':'No itinerary yet.'}</p></div>`}
-async function toggleActivityDone(id,v){let {error}=await sb.from('itinerary').update({completed:v}).eq('id',id);if(error)alert(error.message)}
+function renderItinerary(){
+ todayViewBtn.classList.toggle('active',tripView==='today');allViewBtn.classList.toggle('active',tripView==='all');
+ todayViewBtn.setAttribute('aria-pressed',String(tripView==='today'));allViewBtn.setAttribute('aria-pressed',String(tripView==='all'));
+ const today=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));let ds=groupDays();if(tripView==='today')ds=ds.filter(d=>d.date===today);
+ days.innerHTML=ds.length?ds.map(d=>`<div class="card"><div class="dayHead"><div><span class="pill">${escapeHtml(d.date)}${d.date===today?' · TODAY':''}</span><h2>${escapeHtml(d.title)}</h2></div><button class="primary" onclick="openDayActivity(this.dataset.date,this.dataset.title)" data-date="${escapeHtml(d.date)}" data-title="${escapeHtml(d.title)}">+ Activity</button></div>${d.items.length?d.items.map(a=>`<div class="activity ${a.completed?'doneActivity':''}"><input class="activityCheck" type="checkbox" aria-label="Complete ${escapeHtml(a.title)}" ${a.completed?'checked':''} onchange="toggleActivityDone('${a.id}',this.checked)"><b>${escapeHtml(String(a.activity_time||'').slice(0,5)||'—')} · ${escapeHtml(a.title)}</b><div class="muted">${escapeHtml(a.area||'')}</div>${a.notes?`<div class="tiny">📝 ${escapeHtml(a.notes)}</div>`:''}<div class="actions" style="margin-top:7px"><button class="secondary stopMore" aria-label="Activity actions" data-map="${escapeHtml(a.area?navUrl(a.title,a.area):'')}" onclick="openStopMenu(event,'${a.id}',this.dataset.map)">•••</button>${a.completed?`<button class="secondary" onclick="toggleActivityDone('${a.id}',false)">↩ Undo</button>`:''}</div></div>`).join(''):'<p class="muted">Nothing planned yet. Add an activity for this day.</p>'}</div>`).join(''):'<div class="card"><p class="muted">'+(tripView==='today'?'No trip day for today. Choose All Days to plan ahead.':'Add your trip dates using the calendar above.')+'</p></div>';
+}
+async function toggleActivityDone(id,value){
+ const ok=await saveChange('activity-'+id,'days',tripId=>sb.from('itinerary').update({completed:value}).eq('id',id).eq('trip_id',tripId));
+ if(!ok&&activeTrip)renderItinerary();
+}
 function setTripView(v){tripView=v;renderItinerary()}
 async function addCloudStop(){let date=prompt('Date (YYYY-MM-DD)',activeTrip.start_date);if(!date)return;let dayTitle=prompt('Day title','Day plan')||'Day plan',title=prompt('Place / activity');if(!title)return;let time=prompt('Time (HH:MM)','10:00')||null,area=prompt('Area',activeTrip.city)||'',notes=prompt('Notes (optional)','')||'',same=cloud.itinerary.filter(x=>x.day_date===date),sort=same.length?Math.max(...same.map(x=>x.sort_order||0))+1:0;let {error}=await sb.from('itinerary').insert({trip_id:activeTrip.id,day_date:date,day_title:dayTitle,activity_time:time,title,area,notes,completed:false,sort_order:sort});if(error)alert(error.message)}
 function editCloudStop(id){let a=cloud.itinerary.find(x=>x.id===id);if(!a)return;eaid.value=id;eatitle.value=a.title||'';eatime.value=String(a.activity_time||'').slice(0,5);eaarea.value=a.area||'';eanotes.value=a.notes||'';editActivityModal.classList.add('open')}
-async function saveActivityEdit(){let id=eaid.value;if(!id||!eatitle.value.trim())return;let {error}=await sb.from('itinerary').update({title:eatitle.value.trim(),activity_time:eatime.value||null,area:eaarea.value.trim(),notes:eanotes.value.trim()}).eq('id',id);if(error)return alert(error.message);editActivityModal.classList.remove('open')}
-async function deleteCloudStop(id){if(confirm('Delete this stop?')){let {error}=await sb.from('itinerary').delete().eq('id',id);if(error)alert(error.message)}}
+async function saveActivityEdit(){
+ const id=eaid.value,title=eatitle.value.trim();if(!id||!title)return;
+ const payload={title,activity_time:eatime.value||null,area:eaarea.value.trim(),notes:eanotes.value.trim()};
+ return saveChange('edit-activity','editActivityModal',tripId=>sb.from('itinerary').update(payload).eq('id',id).eq('trip_id',tripId),()=>editActivityModal.classList.remove('open'));
+}
+async function deleteCloudStop(id,confirmed=false){if(confirmed||confirm('Delete this activity?')){let {error}=await sb.from('itinerary').delete().eq('id',id);if(error)alert(error.message)}}
 function renderPlaces(){let cats=['All','Restaurant','Shopping','Attraction','Stay','Other'];filters.innerHTML=cats.map(c=>`<button class="${c===filter?'active':''}" onclick="filter='${c}';renderPlaces()">${c}</button>`).join('');let list=filter==='All'?cloud.places:cloud.places.filter(p=>{
       if(filter==='Restaurant') return ['Restaurant','Food','Café','Cafe'].includes(p.category);
       if(filter==='Stay') return ['Stay','Camping','Hotel'].includes(p.category);
       return p.category===filter;
-    });placeList.innerHTML=list.length?list.map(p=>`<div class="place"><div class="placehead"><div class="grow"><span class="pill">${['Food','Café','Cafe'].includes(p.category)?'Restaurant':['Camping','Hotel'].includes(p.category)?'Stay':(p.category||'Place')}</span><h3 style="margin-top:8px">${p.name}</h3><div class="tiny">📍 ${p.area||''}${p.halal_status?' · '+p.halal_status:''}</div><div class="muted" style="margin-top:5px">${p.notes||''}</div></div></div><div class="placeactions"><button class="secondary stopMore" aria-label="Place actions" onclick="openPlaceMenu(event,'${p.id}')">•••</button></div></div>`).join(''):'<p class="muted">No places yet.</p>'}
-async function saveCloudPlace(){if(!pname.value)return;let {error}=await sb.from('places').insert({trip_id:activeTrip.id,name:pname.value,category:ptype.value,area:parea.value,halal_status:phalal.value,notes:pnote.value});if(error)return alert(error.message);pname.value=parea.value=pnote.value='';placeModal.classList.remove('open')}
+    });placeList.innerHTML=list.length?list.map(p=>`<div class="place"><div class="placehead"><div class="grow"><span class="pill">${['Food','Café','Cafe'].includes(p.category)?'Restaurant':['Camping','Hotel'].includes(p.category)?'Stay':escapeHtml(p.category||'Place')}</span><h3 style="margin-top:8px">${escapeHtml(p.name)}</h3><div class="tiny">📍 ${escapeHtml(p.area||'')}${p.halal_status?' · '+escapeHtml(p.halal_status):''}</div><div class="muted" style="margin-top:5px">${escapeHtml(p.notes||'')}</div></div></div><div class="placeactions"><button class="secondary moreBtn" aria-label="Place actions" data-map="${escapeHtml(navUrl(p.name,p.area))}" onclick="openPlaceMenu(event,'${p.id}',this.dataset.map)">•••</button></div></div>`).join(''):'<p class="muted">No places yet.</p>'}
+
+function openPlaceMenu(ev,id,mapUrl){
+ ev.stopPropagation();document.getElementById('placeContextMenu')?.remove();
+ let m=document.createElement('div');m.id='placeContextMenu';m.className='contextMenu';
+ m.innerHTML='<button data-act="map">Map</button><button class="ctxDelete" data-act="delete">Delete</button>';
+ document.body.appendChild(m);
+ m.querySelector('[data-act="map"]').onclick=()=>{m.remove();window.open(mapUrl,'_blank')};
+ m.querySelector('[data-act="delete"]').onclick=()=>{m.remove();deleteCloudPlace(id)};
+ let r=ev.currentTarget.getBoundingClientRect(),mw=160;
+ m.style.left=Math.max(8,Math.min(innerWidth-mw-8,r.right-mw))+'px';
+ m.style.top=Math.min(innerHeight-m.offsetHeight-8,r.bottom+6)+'px';
+ setTimeout(()=>document.addEventListener('click',()=>m.remove(),{once:true}),0);
+}
+
+async function saveCloudPlace(){
+ const name=pname.value.trim();if(!name)return alert('Enter a place name.');
+ const payload={name,category:ptype.value,area:parea.value.trim(),halal_status:phalal.value,notes:pnote.value.trim()};
+ return saveChange('add-place','placeModal',tripId=>sb.from('places').insert({trip_id:tripId,...payload}),()=>{pname.value=parea.value=pnote.value='';placeModal.classList.remove('open')});
+}
 async function deleteCloudPlace(id){if(confirm('Delete place?')){let {error}=await sb.from('places').delete().eq('id',id);if(error)alert(error.message)}}
 async function placeToTrip(id){let p=cloud.places.find(x=>x.id===id);if(!p)return;let date=prompt('Add to date (YYYY-MM-DD)',activeTrip.start_date);if(!date)return;let title=prompt('Day title','Day plan')||'Day plan',time=prompt('Time','')||null,same=cloud.itinerary.filter(x=>x.day_date===date),sort=same.length?Math.max(...same.map(x=>x.sort_order||0))+1:0;let {error}=await sb.from('itinerary').insert({trip_id:activeTrip.id,day_date:date,day_title:title,activity_time:time,title:p.name,area:p.area,sort_order:sort});if(error)alert(error.message)}
-async function addCloudExpense(){let amount=+eamt.value;if(!ename.value||!amount)return;let payer=epayer.value||'shared';let {error}=await sb.from('expenses').insert({trip_id:activeTrip.id,created_by:user.id,item_name:ename.value,amount,currency:ecur.value,category:ecat.value,paid_by:payer==='shared'?null:payer});if(error)return alert(error.message);ename.value=eamt.value=''}
-async function pairRate(from){if(from==='MYR')return 1;let key='fx_'+from+'_MYR',cached=JSON.parse(localStorage.getItem(key)||'null');try{let r=await fetch(`https://api.frankfurter.dev/v2/rate/${from}/MYR`);if(!r.ok)throw new Error('direct');let d=await r.json();if(!d?.rate)throw new Error('missing');localStorage.setItem(key,JSON.stringify({rate:d.rate,date:d.date}));return d.rate}catch(e){try{let r=await fetch(`https://api.frankfurter.dev/v2/rates?base=EUR&quotes=${from},MYR`);let d=await r.json(),a=d.find(x=>x.quote===from)?.rate,b=d.find(x=>x.quote==='MYR')?.rate;if(a&&b){let rate=b/a;localStorage.setItem(key,JSON.stringify({rate,date:d[0]?.date||''}));return rate}}catch(_){}return cached?.rate||null}}
-async function loadFx(){let currencies=[...new Set(cloud.expenses.map(e=>e.currency).filter(Boolean))];fx={MYR:1};for(let c of currencies)fx[c]=await pairRate(c);fxDate=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});renderExpenses()}
+async function addCloudExpense(){
+ const amount=Number(eamt.value),item=ename.value.trim(),payer=epayer.value||'shared';
+ if(!item||!Number.isFinite(amount)||amount<=0)return alert('Enter an item and an amount greater than zero.');
+ const payload={created_by:user.id,item_name:item,amount,currency:ecur.value,category:ecat.value,paid_by:payer==='shared'?null:payer};
+ return saveChange('add-expense','expenseForm',tripId=>sb.from('expenses').insert({trip_id:tripId,...payload}),()=>{ename.value=eamt.value=''});
+}
+async function pairRate(from){if(from==='MYR')return 1;let key='fx_'+from+'_MYR',cached=null;try{cached=JSON.parse(localStorage.getItem(key)||'null')}catch(_){}try{let r=await fetch(`https://api.frankfurter.dev/v2/rate/${from}/MYR`);if(!r.ok)throw new Error('direct');let d=await r.json();if(!d?.rate)throw new Error('missing');localStorage.setItem(key,JSON.stringify({rate:d.rate,date:d.date}));return d.rate}catch(e){try{let r=await fetch(`https://api.frankfurter.dev/v2/rates?base=EUR&quotes=${from},MYR`);let d=await r.json(),a=d.find(x=>x.quote===from)?.rate,b=d.find(x=>x.quote==='MYR')?.rate;if(a&&b){let rate=b/a;localStorage.setItem(key,JSON.stringify({rate,date:d[0]?.date||''}));return rate}}catch(_){}return cached?.rate||null}}
+let fxSignature='',fxStartedAt=0;
+async function loadFx(){
+ const currencies=[...new Set(cloud.expenses.map(e=>e.currency).filter(c=>c&&c!=='MYR'))].sort();
+ const signature=tripSession+':'+currencies.join(',');if(signature===fxSignature&&Date.now()-fxStartedAt<600000)return;
+ fxSignature=signature;fxStartedAt=Date.now();const request=++fxRequest,session=tripSession;
+ const results=await Promise.allSettled(currencies.map(pairRate));if(request!==fxRequest||session!==tripSession)return;
+ fx={MYR:1};currencies.forEach((currency,i)=>{const r=results[i];fx[currency]=r.status==='fulfilled'?r.value:null});
+ fxDate=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});renderExpenses();if(activeTrip)renderTripSummary(dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city)));
+}
 function myr(v){return 'RM '+Number(v||0).toFixed(2)}function toMYR(a,c){return c==='MYR'?+a:(fx[c]?+a*fx[c]:null)}
 function renderSpendTotal(){let sum=0,ok=true;cloud.expenses.forEach(e=>{let v=toMYR(e.amount,e.currency);if(v==null)ok=false;else sum+=v});homeSpend.textContent=myr(sum);homeSpendNote.textContent=(ok?'Latest available FX':'Some FX unavailable')+(fxDate?' · updated '+fxDate:'')}
 function payerName(id){if(!id)return 'Shared';let m=cloud.members.find(x=>x.user_id===id);return m?.display_name||(id===user.id?'Me':'Partner')}
-function populatePayers(){if(typeof epayer==='undefined')return;epayer.innerHTML=`<option value="shared">◎ Shared</option>`+cloud.members.map(m=>`<option value="${m.user_id}">${m.user_id===user.id?'○ Mine':'◉ Partner'} · ${m.display_name||'Member'}</option>`).join('')}
-function renderExpenses(){let sum=0,ok=true;cloud.expenses.forEach(e=>{let v=toMYR(e.amount,e.currency);if(v==null)ok=false;else sum+=v});totals.innerHTML=`<div class="muted">Total spent</div><div class="bigmoney">${myr(sum)}</div><div class="converted">${ok?'Converted to MYR using latest available rates':'Some currency conversion unavailable'}</div>`;expenses.innerHTML=cloud.expenses.map(e=>{let v=toMYR(e.amount,e.currency);return `<div class="expense"><div><b>${e.item_name}</b><div class="tiny">${e.category||''} · Paid by ${payerName(e.paid_by)}</div></div><div class="expenseR"><b>${e.currency} ${Number(e.amount).toFixed(e.currency==='KRW'?0:2)}</b>${e.currency!=='MYR'?`<div class="converted">≈ ${v==null?'—':myr(v)}</div>`:''}<button class="danger smallIconBtn" title="Delete expense" onclick="deleteExpense('${e.id}')">🗑</button></div></div>`}).join('');renderSpendTotal();populatePayers()}
+function updateSelectOptions(select,options,fallback){
+ const previous=select.value;const html=options.map(([value,label])=>`<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join('');
+ if(select.innerHTML!==html)select.innerHTML=html;
+ select.value=options.some(([value])=>String(value)===previous)?previous:String(fallback??options[0]?.[0]??'');
+}
+function populatePayers(){
+ updateSelectOptions(epayer,[['shared','↔ Shared'],...cloud.members.map(m=>[m.user_id,(m.user_id===user.id?'● ':'◇ ')+(m.display_name||'Member')])],'shared');
+}
+function populateCurrencies(){
+ const currencies=[activeTrip.currency,'MYR','SGD','KRW','JPY','IDR','USD'].filter((x,i,a)=>x&&a.indexOf(x)===i);
+ updateSelectOptions(ecur,currencies.map(value=>[value,value]),activeTrip.currency||'MYR');
+}
+function renderExpenses(){let sum=0,ok=true;cloud.expenses.forEach(e=>{let v=toMYR(e.amount,e.currency);if(v==null)ok=false;else sum+=v});totals.innerHTML=`<div class="muted">Total spent</div><div class="bigmoney">${myr(sum)}</div><div class="converted">${ok?'Converted to MYR using latest available rates':'Some currency conversion unavailable'}</div>`;expenses.innerHTML=cloud.expenses.map(e=>{let v=toMYR(e.amount,e.currency);return `<div class="expense"><div><b>${escapeHtml(e.item_name)}</b><div class="tiny">${escapeHtml(e.category||'')} · Paid by ${escapeHtml(payerName(e.paid_by))}${!e.paid_by?`<span class="sharedExpenseTag">Shared</span>`:''}</div></div><div class="expenseR"><b>${escapeHtml(e.currency)} ${Number(e.amount).toFixed(e.currency==='KRW'?0:2)}</b>${e.currency!=='MYR'?`<div class="converted">≈ ${v==null?'—':myr(v)}</div>`:''}<button class="danger smallIconBtn" title="Delete expense" onclick="deleteExpense('${e.id}')">🗑</button></div></div>`}).join('');renderSpendTotal();populatePayers()}
 async function deleteExpense(id){if(!confirm('Delete this expense?'))return;let {error}=await sb.from('expenses').delete().eq('id',id);if(error)return alert('Could not delete expense: '+error.message);cloud.expenses=cloud.expenses.filter(x=>x.id!==id);renderExpenses()}
 function partner(){return cloud.members.find(m=>m.user_id!==user.id)||null}
-function pickChecklist(v,b){checkView=v;document.querySelectorAll('#more .tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderChecks()}
+function pickChecklist(v,b){checkView=v;document.querySelectorAll('#checklists .tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderChecks()}
 function checklistRows(){if(checkView==='shared')return cloud.checks.filter(x=>x.list_type==='shared');if(checkView==='mine')return cloud.checks.filter(x=>x.list_type==='personal'&&x.owner_id===user.id);let p=partner();return p?cloud.checks.filter(x=>x.list_type==='personal'&&x.owner_id===p.user_id):[]}
-function renderChecks(){let arr=checklistRows(),editable=checkView!=='partner';checkAddRow.classList.toggle('hidden',!editable);checkList.innerHTML=arr.length?arr.map(x=>`<div class="check" data-check-id="${x.id}">${editable?`<span class="dragHandle" title="Drag to reorder" onpointerdown="startCheckDrag(event,this)">≡</span>`:''}<label class="checkleft"><input type="checkbox" ${x.completed?'checked':''} ${editable?'':'disabled'} onchange="toggleCheck('${x.id}',this.checked)"><span>${x.item_text}</span></label>${editable?`<span class="checkactions"><button class="secondary stopMore" aria-label="Checklist actions" onclick="openCheckMenu(event,'${x.id}')">•••</button></span>`:''}</div>`).join(''):`<p class="muted">${checkView==='partner'&&!partner()?'Partner has not joined this trip yet.':'Empty — add your own items.'}</p>`}
-async function addCloudCheck(){let text=newCheck.value.trim();if(!text)return;let payload={trip_id:activeTrip.id,item_text:text,completed:false,sort_order:checklistRows().length};if(checkView==='shared'){payload.list_type='shared';payload.owner_id=null}else{payload.list_type='personal';payload.owner_id=user.id}let {error}=await sb.from('checklists').insert(payload);if(error)return alert(error.message);newCheck.value=''}
-async function toggleCheck(id,v){let {error}=await sb.from('checklists').update({completed:v}).eq('id',id);if(error)alert(error.message)}
+function renderChecks(){
+ if(checkDrag.row)return;
+ document.querySelectorAll('#checklists .tabs button').forEach((button,i)=>{const selected=['mine','partner','shared'][i]===checkView;button.classList.toggle('active',selected);button.setAttribute('aria-pressed',String(selected))});
+ let arr=checklistRows().slice().sort((a,b)=>(a.sort_order??9999)-(b.sort_order??9999)),editable=checkView!=='partner';
+ checkAddRow.classList.toggle('hidden',!editable);
+ checkList.innerHTML=arr.length?arr.map(x=>`<div class="check" data-check-id="${x.id}">
+   ${editable?`<span class="dragHandle" title="Drag to reorder" onpointerdown="checkDragStart(event,this)">☰</span>`:''}
+   <label class="checkleft"><input type="checkbox" ${x.completed?'checked':''} ${editable?'':'disabled'} onchange="toggleCheck('${x.id}',this.checked)"><span>${escapeHtml(x.item_text)}</span></label>
+   ${editable?`<span class="checkactions"><button class="secondary moreBtn" aria-label="Checklist actions" onclick="openChecklistMenu(event,'${x.id}')">•••</button></span>`:''}
+ </div>`).join(''):`<p class="muted">${checkView==='partner'&&!partner()?'Partner has not joined this trip yet.':'Empty — add your own items.'}</p>`
+}
+
+function openChecklistMenu(ev,id){
+ ev.stopPropagation();document.getElementById('checkContextMenu')?.remove();
+ let m=document.createElement('div');m.id='checkContextMenu';m.className='contextMenu';
+ m.innerHTML='<button data-act="up">Move up</button><button data-act="down">Move down</button><button data-act="edit">Edit</button><button class="ctxDelete" data-act="delete">Delete</button>';
+ m.querySelector('[data-act="up"]').onclick=()=>{m.remove();moveChecklistItem(id,-1)};
+ m.querySelector('[data-act="down"]').onclick=()=>{m.remove();moveChecklistItem(id,1)};
+ document.body.appendChild(m);
+ m.querySelector('[data-act="edit"]').onclick=()=>{m.remove();editCheck(id)};
+ m.querySelector('[data-act="delete"]').onclick=()=>{m.remove();deleteCheck(id)};
+ let r=ev.currentTarget.getBoundingClientRect(),mw=160;
+ m.style.left=Math.max(8,Math.min(innerWidth-mw-8,r.right-mw))+'px';
+ m.style.top=Math.min(innerHeight-m.offsetHeight-8,r.bottom+6)+'px';
+ setTimeout(()=>document.addEventListener('click',()=>m.remove(),{once:true}),0);
+}
+
+let checkDrag={row:null,pointerId:null};
+function checkDragStart(ev,handle){
+ if(checkView==='partner'||actionGuard.busy||checkDrag.row)return;
+ let row=handle.closest('.check'); if(!row)return;
+ checkDrag={row,pointerId:ev.pointerId};
+ handle.setPointerCapture?.(ev.pointerId);
+ row.classList.add('dragging');
+ document.body.style.userSelect='none';
+ handle.addEventListener('pointermove',checkDragMove);
+ handle.addEventListener('pointerup',checkDragEnd,{once:true});
+ handle.addEventListener('pointercancel',checkDragEnd,{once:true});
+ ev.preventDefault();
+}
+function checkDragMove(ev){
+ if(!checkDrag.row||ev.pointerId!==checkDrag.pointerId)return;
+ let el=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.check');
+ document.querySelectorAll('#checkList .check.dragTarget').forEach(x=>x.classList.remove('dragTarget'));
+ if(!el||el===checkDrag.row||el.parentElement!==checkList)return;
+ el.classList.add('dragTarget');
+ let r=el.getBoundingClientRect();
+ if(ev.clientY<r.top+r.height/2) checkList.insertBefore(checkDrag.row,el);
+ else checkList.insertBefore(checkDrag.row,el.nextSibling);
+}
+async function checkDragEnd(ev){
+ let handle=ev.currentTarget,row=checkDrag.row;
+ handle.removeEventListener('pointermove',checkDragMove);
+ handle.removeEventListener('pointerup',checkDragEnd);handle.removeEventListener('pointercancel',checkDragEnd);
+ if(!row)return;
+ row?.classList.remove('dragging');
+ document.querySelectorAll('#checkList .check.dragTarget').forEach(x=>x.classList.remove('dragTarget'));
+ document.body.style.userSelect='';
+ checkDrag={row:null,pointerId:null};
+ if(ev.type==='pointercancel'){renderChecks();return}
+ await saveChecklistOrder();
+}
+async function moveChecklistItem(id,direction){
+ if(checkView==='partner')return;const row=checkList.querySelector(`[data-check-id="${id}"]`),adjacent=direction<0?row?.previousElementSibling:row?.nextElementSibling;
+ if(!row||!adjacent)return;checkList.insertBefore(row,direction<0?adjacent:adjacent.nextSibling);await saveChecklistOrder();
+}
+async function saveChecklistOrder(){
+ const ids=[...checkList.querySelectorAll('.check[data-check-id]')].map(x=>x.dataset.checkId);
+ const ok=await saveChange('checklist-order','checkList',async tripId=>{
+  const results=await Promise.allSettled(ids.map((id,i)=>sb.from('checklists').update({sort_order:i}).eq('id',id).eq('trip_id',tripId)));
+  const failed=results.find(r=>r.status==='rejected'||r.value?.error);
+  if(failed)throw new Error('Some checklist positions could not be saved. Refresh and try again.');
+  return {};
+ });
+ if(!ok){await loadCloudData();renderChecks()}
+}
+
+async function addCloudCheck(){
+ const text=newCheck.value.trim();if(!text||checkView==='partner')return;
+ const payload={item_text:text,completed:false,sort_order:Math.max(-1,...checklistRows().map(x=>x.sort_order||0))+1,list_type:checkView==='shared'?'shared':'personal',owner_id:checkView==='shared'?null:user.id};
+ return saveChange('add-check','checkAddRow',tripId=>sb.from('checklists').insert({trip_id:tripId,...payload}),()=>newCheck.value='');
+}
+async function toggleCheck(id,value){
+ const ok=await saveChange('check-'+id,'checkList',tripId=>sb.from('checklists').update({completed:value}).eq('id',id).eq('trip_id',tripId));if(!ok)renderChecks();
+}
+
 async function editCheck(id){let x=cloud.checks.find(c=>c.id===id),v=prompt('Edit item',x?.item_text||'');if(v===null)return;let {error}=await sb.from('checklists').update({item_text:v}).eq('id',id);if(error)alert(error.message)}
 async function deleteCheck(id){if(!confirm('Delete this checklist item?'))return;let {error}=await sb.from('checklists').delete().eq('id',id);if(error)return alert(error.message);cloud.checks=cloud.checks.filter(x=>x.id!==id);renderChecks()}
-function renderMembers(){memberList.innerHTML=cloud.members.map(m=>`<div class="activity"><b>${m.user_id===user.id?'👦 ': '👧 '}${m.display_name||'Member'}</b><div class="tiny">${m.role}</div></div>`).join('')}
+function renderMembers(){memberList.innerHTML=cloud.members.map(m=>`<div class="activity"><b>${m.user_id===user.id?'👦 ': '👧 '}${escapeHtml(m.display_name||'Member')}</b><div class="tiny">${escapeHtml(m.role)}</div></div>`).join('')}
 
 
 let activityType='place';
 function escapeHtml(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function openDayActivity(date,title){adate.value=date;adaytitle.value=title;activityModalTitle.textContent='Add Activity · '+date;aplace.innerHTML=cloud.places.length?cloud.places.map(p=>`<option value="${p.id}">${p.name}${p.area?' · '+p.area:''}</option>`).join(''):'<option value="">No saved places yet</option>';atime.value='';atitle.value='';aarea.value='';anotes.value='';setActivityType(cloud.places.length?'place':'activity');syncSavedPlaceArea();activityModal.classList.add('open')}
+function openDayActivity(date,title){adate.value=date;adaytitle.value=title;activityModalTitle.textContent='Add Activity · '+date;aplace.innerHTML=cloud.places.length?cloud.places.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}${p.area?' · '+escapeHtml(p.area):''}</option>`).join(''):'<option value="">No saved places yet</option>';atime.value='';atitle.value='';aarea.value='';anotes.value='';setActivityType(cloud.places.length?'place':'activity');syncSavedPlaceArea();activityModal.classList.add('open')}
 function setActivityType(v){activityType=v;atypePlace.classList.toggle('active',v==='place');atypeActivity.classList.toggle('active',v==='activity');activityPlaceRow.classList.toggle('hidden',v!=='place');activityFreeRow.classList.toggle('hidden',v!=='activity')}
-async function saveDayActivity(){let date=adate.value,dayTitle=adaytitle.value||'Day plan',title='',area=aarea.value.trim();if(activityType==='place'){let p=cloud.places.find(x=>x.id===aplace.value);if(!p)return alert('Choose a saved place, or select Activity.');title=p.name;area=area||p.area||''}else{title=atitle.value.trim();if(!title)return alert('Enter an activity.')}let same=cloud.itinerary.filter(x=>x.day_date===date),sort=same.length?Math.max(...same.map(x=>x.sort_order||0))+1:0;let {error}=await sb.from('itinerary').insert({trip_id:activeTrip.id,day_date:date,day_title:dayTitle,activity_time:atime.value||null,title,area,notes:anotes.value.trim(),completed:false,sort_order:sort});if(error)return alert(error.message);activityModal.classList.remove('open')}
+async function saveDayActivity(){
+ const date=adate.value,dayTitle=adaytitle.value||'Day plan';let title='',area=aarea.value.trim();
+ if(activityType==='place'){const p=cloud.places.find(x=>x.id===aplace.value);if(!p)return alert('Choose a saved place, or select Activity.');title=p.name;area=area||p.area||''}
+ else{title=atitle.value.trim();if(!title)return alert('Enter an activity.')}
+ const same=cloud.itinerary.filter(x=>x.day_date===date),sort=Math.max(-1,...same.map(x=>x.sort_order||0))+1;
+ const payload={day_date:date,day_title:dayTitle,activity_time:atime.value||null,title,area,notes:anotes.value.trim(),completed:false,sort_order:sort};
+ return saveChange('add-activity','activityModal',tripId=>sb.from('itinerary').insert({trip_id:tripId,...payload}),()=>activityModal.classList.remove('open'));
+}
 
 
 let destTimer=null,placeTimer=null,profileImageData=null;
 
 let editDestTimer=null;
-function scheduleEditDestinationSearch(){clearTimeout(editDestTimer);let q=etcity.value.trim();if(q.length<2){editDestSuggest.classList.add('hidden');return}editDestTimer=setTimeout(()=>searchEditDestination(q),350)}
-async function searchEditDestination(q){try{let rows=await geoSearch(q,7);window._editDestResults=rows;editDestSuggest.innerHTML=rows.map((x,i)=>`<div class="suggestItem" onclick="pickEditDestination(${i})"><b>${escapeHtml(x.name||x.display_name.split(',')[0])}</b><div class="tiny">${escapeHtml(x.display_name)}</div></div>`).join('')||'<div class="suggestItem muted">No match</div>';editDestSuggest.classList.remove('hidden')}catch(e){editDestSuggest.innerHTML='<div class="suggestItem muted">Search unavailable. Manual entry still works.</div>';editDestSuggest.classList.remove('hidden')}}
+function scheduleEditDestinationSearch(){delete etcity.dataset.city;etcountry.value=etcurrency.value=ettimezone.value='';clearTimeout(editDestTimer);let q=etcity.value.trim();if(q.length<2){editDestSuggest.classList.add('hidden');return}editDestTimer=setTimeout(()=>searchEditDestination(q),350)}
+async function searchEditDestination(q){try{let rows=await geoSearch(q,7);if(etcity.value.trim()!==q)return;window._editDestResults=rows;editDestSuggest.innerHTML=rows.map((x,i)=>`<div class="suggestItem" onclick="pickEditDestination(${i})"><b>${escapeHtml(x.name||x.display_name.split(',')[0])}</b><div class="tiny">${escapeHtml(x.display_name)}</div></div>`).join('')||'<div class="suggestItem muted">No match</div>';editDestSuggest.classList.remove('hidden')}catch(e){editDestSuggest.innerHTML='<div class="suggestItem muted">Search unavailable. Manual entry still works.</div>';editDestSuggest.classList.remove('hidden')}}
 function pickEditDestination(i){let x=window._editDestResults?.[i];if(!x)return;let a=x.address||{},country=a.country||x.display_name.split(',').slice(-1)[0].trim(),city=a.city||a.town||a.village||a.county||a.state||x.name||x.display_name.split(',')[0];etcity.value=x.display_name;etcity.dataset.city=city;etcountry.value=country;etcurrency.value=currencyFor(country);ettimezone.value=inferTimezone(country,city);editDestSuggest.classList.add('hidden')}
 
 function currencyFor(country=''){let s=country.toLowerCase();if(s.includes('japan'))return'JPY';if(s.includes('korea'))return'KRW';if(s.includes('indonesia'))return'IDR';if(s.includes('singapore'))return'SGD';if(s.includes('malaysia'))return'MYR';if(s.includes('united states')||s.includes('usa'))return'USD';return'USD'}
-function scheduleDestinationSearch(){clearTimeout(destTimer);let q=tcity.value.trim();if(q.length<2){tripDestSuggest.classList.add('hidden');return}destTimer=setTimeout(()=>searchDestination(q),350)}
-async function searchDestination(q){try{let rows=await geoSearch(q,7);window._destResults=rows;tripDestSuggest.innerHTML=rows.map((x,i)=>`<div class="suggestItem" onclick="pickDestination(${i})"><b>${escapeHtml(x.name||x.display_name.split(',')[0])}</b><div class="tiny">${escapeHtml(x.display_name)}</div></div>`).join('')||'<div class="suggestItem muted">No match. Try a broader destination.</div>';tripDestSuggest.classList.remove('hidden')}catch(e){tripDestSuggest.innerHTML='<div class="suggestItem muted">Search unavailable. Manual entry still works.</div>';tripDestSuggest.classList.remove('hidden')}}
+function scheduleDestinationSearch(){delete tcity.dataset.city;tcountry.value=tcurrency.value=ttimezone.value='';clearTimeout(destTimer);let q=tcity.value.trim();if(q.length<2){tripDestSuggest.classList.add('hidden');return}destTimer=setTimeout(()=>searchDestination(q),350)}
+async function searchDestination(q){try{let rows=await geoSearch(q,7);if(tcity.value.trim()!==q)return;window._destResults=rows;tripDestSuggest.innerHTML=rows.map((x,i)=>`<div class="suggestItem" onclick="pickDestination(${i})"><b>${escapeHtml(x.name||x.display_name.split(',')[0])}</b><div class="tiny">${escapeHtml(x.display_name)}</div></div>`).join('')||'<div class="suggestItem muted">No match. Try a broader destination.</div>';tripDestSuggest.classList.remove('hidden')}catch(e){tripDestSuggest.innerHTML='<div class="suggestItem muted">Search unavailable. Manual entry still works.</div>';tripDestSuggest.classList.remove('hidden')}}
 function pickDestination(i){let x=window._destResults?.[i];if(!x)return;let a=x.address||{},country=a.country||x.display_name.split(',').slice(-1)[0].trim(),city=a.city||a.town||a.village||a.county||a.state||x.name||x.display_name.split(',')[0];tcity.value=x.display_name;tcity.dataset.city=city;tcountry.value=country;tcurrency.value=currencyFor(country);ttimezone.value=inferTimezone(country,city);tripDestSuggest.classList.add('hidden')}
 function schedulePlaceSearch(){clearTimeout(placeTimer);let q=pname.value.trim();if(q.length<3){placeSuggest.classList.add('hidden');return}placeTimer=setTimeout(()=>searchPlace(q),450)}
 async function searchPlace(q){try{let ctx=[activeTrip?.city,activeTrip?.country].filter(Boolean).join(', '),url=`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6&q=${encodeURIComponent(q+(ctx?', '+ctx:''))}`,d=await fetch(url,{headers:{Accept:'application/json'}}).then(r=>r.json());window._placeResults=d||[];placeSuggest.innerHTML=window._placeResults.map((x,i)=>`<div class="suggestItem" onclick="pickPlace(${i})"><b>${escapeHtml((x.name||x.display_name.split(',')[0]))}</b><div class="tiny">${escapeHtml(x.display_name)}</div></div>`).join('')||'<div class="suggestItem muted">No match. You can still save manually.</div>';placeSuggest.classList.remove('hidden')}catch(e){placeSuggest.innerHTML='<div class="suggestItem muted">Location search unavailable. Manual entry still works.</div>';placeSuggest.classList.remove('hidden')}}
@@ -595,21 +855,33 @@ function applyLook(){document.body.classList.toggle('dark',appSettings.appearanc
 function openProfile(){let m=cloud.members.find(x=>x.user_id===user.id);profileName.value=m?.display_name||user.user_metadata?.display_name||'';profileFile.value='';profileImageData=null;cropWrap.classList.add('hidden');cropZoom.value='1';profileModal.classList.add('open')}
 function loadProfileCrop(e){let f=e.target.files?.[0];if(!f)return;let r=new FileReader();r.onload=()=>{profileImageData=r.result;cropImage.src=r.result;cropZoom.value='1';cropWrap.classList.remove('hidden');updateCropPreview()};r.readAsDataURL(f)}
 function updateCropPreview(){cropImage.style.transform=`scale(${cropZoom.value||1})`}
-async function croppedProfileBlob(){if(!profileImageData)return null;let img=new Image();img.src=profileImageData;await img.decode();let size=Math.min(img.naturalWidth,img.naturalHeight),sx=(img.naturalWidth-size)/2,sy=(img.naturalHeight-size)/2,c=document.createElement('canvas');c.width=c.height=512;let ctx=c.getContext('2d');ctx.drawImage(img,sx,sy,size,size,0,0,512,512);return await new Promise(r=>c.toBlob(r,'image/jpeg',.88))}
-async function saveProfile(){let m=cloud.members.find(x=>x.user_id===user.id),name=profileName.value.trim()||'Traveller',avatar=m?.avatar_url||null,blob=await croppedProfileBlob();if(blob){let path=`${user.id}/${Date.now()}.jpg`,up=await sb.storage.from('avatars').upload(path,blob,{contentType:'image/jpeg'});if(up.error)return alert(up.error.message);avatar=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl}let {error}=await sb.from('trip_members').update({display_name:name,avatar_url:avatar}).eq('trip_id',activeTrip.id).eq('user_id',user.id);if(error)return alert(error.message);profileModal.classList.remove('open');await loadCloudData()}
+async function croppedProfileBlob(){if(!profileImageData)return null;let img=new Image();img.src=profileImageData;await img.decode();let size=Math.min(img.naturalWidth,img.naturalHeight)/Math.max(1,Number(cropZoom.value)||1),sx=(img.naturalWidth-size)/2,sy=(img.naturalHeight-size)/2,c=document.createElement('canvas');c.width=c.height=512;let ctx=c.getContext('2d');ctx.drawImage(img,sx,sy,size,size,0,0,512,512);return await new Promise(r=>c.toBlob(r,'image/jpeg',.88))}
+async function saveProfile(){
+ const session=tripSession,id=activeTrip?.id;if(!id)return;
+ return pendingAction('save-profile','profileModal',async()=>{
+  const m=cloud.members.find(x=>x.user_id===user.id),name=profileName.value.trim()||'Traveller';let avatar=m?.avatar_url||null;
+  const blob=await croppedProfileBlob();if(blob){const path=`${user.id}/${Date.now()}.jpg`,up=await sb.storage.from('avatars').upload(path,blob,{contentType:'image/jpeg'});if(up.error)throw up.error;avatar=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl}
+  const {error}=await sb.from('trip_members').update({display_name:name,avatar_url:avatar}).eq('trip_id',id).eq('user_id',user.id);if(error)throw error;
+  if(session===tripSession){clearDraftFields('profileModal');profileModal.classList.remove('open');await loadCloudData()}return true;
+ });
+}
 async function removeProfilePicture(){let {error}=await sb.from('trip_members').update({avatar_url:null}).eq('trip_id',activeTrip.id).eq('user_id',user.id);if(error)return alert(error.message);profileImageData=null;cropWrap.classList.add('hidden');await loadCloudData();alert('Profile picture removed.')}
 
 
 
-function placeById(id){return cloud.places.find(x=>x.id===id)}
-function openContextMenu(ev,html){ev.stopPropagation();document.getElementById('stopContextMenu')?.remove();let m=document.createElement('div');m.id='stopContextMenu';m.className='contextMenu';m.innerHTML=html;document.body.appendChild(m);let r=ev.currentTarget.getBoundingClientRect();m.style.left=Math.max(8,Math.min(innerWidth-163,r.right-155))+'px';m.style.top=Math.min(innerHeight-m.offsetHeight-8,r.bottom+6)+'px';setTimeout(()=>document.addEventListener('click',()=>m.remove(),{once:true}),0)}
-function openStopMenu(ev,id){let a=cloud.itinerary.find(x=>x.id===id);let map=a?.area?`<button class="ctxMap" onclick="window.open('${navUrl(a.title,a.area)}','_blank');this.parentElement.remove()">Map</button>`:'';openContextMenu(ev,map+`<button onclick="editCloudStop('${id}');this.parentElement.remove()">Edit</button><button class="ctxDelete" onclick="if(confirm('Delete this activity?'))deleteCloudStop('${id}');this.parentElement.remove()">Delete</button>`)}
-function openPlaceMenu(ev,id){let p=placeById(id);if(!p)return;openContextMenu(ev,`<button class="ctxMap" onclick="window.open('${navUrl(p.name,p.area)}','_blank');this.parentElement.remove()">Map</button><button onclick="editCloudPlace('${id}');this.parentElement.remove()">Edit</button><button class="ctxDelete" onclick="if(confirm('Delete this place?'))deleteCloudPlace('${id}');this.parentElement.remove()">Delete</button>`)}
-async function editCloudPlace(id){let p=placeById(id);if(!p)return;let name=prompt('Place name',p.name||'');if(name===null)return;let area=prompt('Area / location',p.area||'');if(area===null)return;let notes=prompt('Notes',p.notes||'');if(notes===null)return;let {error}=await sb.from('places').update({name:name.trim()||p.name,area:area.trim(),notes:notes.trim()}).eq('id',id);if(error)alert(error.message)}
-function openCheckMenu(ev,id){openContextMenu(ev,`<button onclick="editCheck('${id}');this.parentElement.remove()">Edit</button><button class="ctxDelete" onclick="if(confirm('Delete this checklist item?'))deleteCheck('${id}');this.parentElement.remove()">Delete</button>`)}
-let draggedCheck=null;
-function startCheckDrag(ev,handle){if(ev.button!==undefined&&ev.button!==0)return;let row=handle.closest('.check');draggedCheck=row;row.classList.add('dragging');handle.setPointerCapture?.(ev.pointerId);ev.preventDefault();let move=e=>{if(!draggedCheck)return;let target=document.elementFromPoint(e.clientX,e.clientY)?.closest('.check');if(target&&target!==draggedCheck&&target.parentElement===checkList){let r=target.getBoundingClientRect();checkList.insertBefore(draggedCheck,e.clientY<r.top+r.height/2?target:target.nextSibling)}};let up=async e=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);if(!draggedCheck)return;draggedCheck.classList.remove('dragging');draggedCheck=null;await saveCheckOrder()};document.addEventListener('pointermove',move,{passive:false});document.addEventListener('pointerup',up,{once:true})}
-async function saveCheckOrder(){let ids=[...checkList.querySelectorAll('.check[data-check-id]')].map(x=>x.dataset.checkId);for(let i=0;i<ids.length;i++){let item=cloud.checks.find(x=>x.id===ids[i]);if(item)item.sort_order=i}let results=await Promise.all(ids.map((id,i)=>sb.from('checklists').update({sort_order:i}).eq('id',id)));let bad=results.find(x=>x.error);if(bad){alert('Could not save checklist order: '+bad.error.message);await loadCloudData()}}
+function openStopMenu(ev,id,mapUrl){
+ ev.stopPropagation();document.getElementById('stopContextMenu')?.remove();
+ let m=document.createElement('div');m.id='stopContextMenu';m.className='contextMenu';
+ m.innerHTML=`${mapUrl?'<button data-act="map">Map</button>':''}<button data-act="edit">Edit</button><button class="ctxDelete" data-act="delete">Delete</button>`;
+ document.body.appendChild(m);
+ m.querySelector('[data-act="map"]')?.addEventListener('click',()=>{m.remove();window.open(mapUrl,'_blank')});
+ m.querySelector('[data-act="edit"]').onclick=()=>{m.remove();editCloudStop(id)};
+ m.querySelector('[data-act="delete"]').onclick=()=>{m.remove();if(confirm('Delete this activity?'))deleteCloudStop(id,true)};
+ let r=ev.currentTarget.getBoundingClientRect(),mw=160;
+ m.style.left=Math.max(8,Math.min(innerWidth-mw-8,r.right-mw))+'px';
+ m.style.top=Math.min(innerHeight-m.offsetHeight-8,r.bottom+6)+'px';
+ setTimeout(()=>document.addEventListener('click',()=>m.remove(),{once:true}),0);
+}
 
 let areaSearchTimer=null,placeNameSearchTimer=null,activityAreaTimer=null;
 async function geoSearch(q,limit=6){
@@ -631,37 +903,68 @@ function currentMinutes(tz){let p=new Intl.DateTimeFormat('en-GB',{timeZone:tz,h
 function timeSort(t){if(!t)return 9999;let s=String(t).slice(0,5).split(':');return (+s[0])*60+(+s[1])}
 function daysBetween(a,b){return Math.max(0,Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000))}
 function isTripToday(){if(!activeTrip)return false;let d=dateInTZ(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));return d>=activeTrip.start_date&&d<=activeTrip.end_date}
-function chooseNextActivity(items,today){if(!items.length)return null;let same=items.filter(x=>x.day_date===today);if(same.length){let now=currentMinutes(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city)),future=same.filter(x=>timeSort(x.activity_time)>=now).sort((a,b)=>timeSort(a.activity_time)-timeSort(b.activity_time));return future[0]||same.sort((a,b)=>timeSort(a.activity_time)-timeSort(b.activity_time))[0]}return items.sort((a,b)=>(a.day_date||'').localeCompare(b.day_date||'')||timeSort(a.activity_time)-timeSort(b.activity_time))[0]}
-function renderSmartNow(a,today){if(!a){smartNowLine.textContent='NEXT · Everything completed 🎉';smartNowActions.innerHTML='';travelWarnLine.textContent='';return}let tz=activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city),label='NEXT',diff=null;if(a.day_date===today&&a.activity_time){diff=timeSort(a.activity_time)-currentMinutes(tz);if(diff<=10&&diff>=-45)label='NOW'}smartNowLine.textContent=`${label} · ${String(a.activity_time||'').slice(0,5)||'—'} ${a.title}`;smartNowActions.innerHTML=`<a class="btn" target="_blank" href="${navUrl(a.title,a.area)}">Navigate</a><button class="secondary" onclick="toggleActivityDone('${a.id}',true)">✓</button>`;travelWarnLine.textContent=(appSettings.travelWarning&&diff!==null&&diff>0&&diff<=appSettings.buffer)?`🚇 Leave reminder · starts in ${diff} min`:''}
+function chooseNextActivity(items,today){
+ const ordered=items.slice().sort((a,b)=>(a.day_date||'').localeCompare(b.day_date||'')||timeSort(a.activity_time)-timeSort(b.activity_time));
+ const same=ordered.filter(x=>x.day_date===today),now=currentMinutes(activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city));
+ return same.find(x=>timeSort(x.activity_time)>=now)||same[0]||ordered.find(x=>x.day_date>today)||ordered[0]||null;
+}
+function renderSmartNow(a,today){if(!a){smartNowLine.textContent=cloud.itinerary.length?'Everything completed 🎉':'Nothing planned yet. Add an activity in Trip.';smartNowActions.innerHTML='';travelWarnLine.textContent='';return}let tz=activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city),label='NEXT',diff=null;if(a.day_date===today&&a.activity_time){diff=timeSort(a.activity_time)-currentMinutes(tz);if(diff<=10&&diff>=-45)label='NOW'}smartNowLine.textContent=`${label} · ${String(a.activity_time||'').slice(0,5)||'—'} ${a.title}`;smartNowActions.innerHTML=`<a class="btn" target="_blank" href="${navUrl(a.title,a.area)}">Navigate</a><button class="secondary" onclick="toggleActivityDone('${a.id}',true)">✓</button>`;travelWarnLine.textContent=(appSettings.travelWarning&&diff!==null&&diff>0&&diff<=appSettings.buffer)?`🚇 Leave reminder · starts in ${diff} min`:''}
 function startClocks(){if(clockTimer)clearInterval(clockTimer);renderDualClock();clockTimer=setInterval(renderDualClock,30000)}
 function renderDualClock(){if(!activeTrip)return;let tz=activeTrip.timezone||inferTimezone(activeTrip.country,activeTrip.city),fmt=z=>new Intl.DateTimeFormat('en-GB',{timeZone:z,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date()),localMalaysia=tz==='Asia/Kuala_Lumpur'||(activeTrip.country||'').toLowerCase().includes('malaysia');destClockLabel.textContent=`${flag(activeTrip.country)} ${(activeTrip.city||'DESTINATION').toUpperCase()}`;destClock.textContent=fmt(tz);let boxes=document.querySelectorAll('.clockCard .clockBox');if(boxes[1])boxes[1].classList.toggle('hidden',localMalaysia);document.querySelector('.clockCard').style.gridTemplateColumns=localMalaysia?'1fr':'1fr 1fr';myClock.textContent=fmt('Asia/Kuala_Lumpur')}
 function renderOptionalProgress(day){homeProgressCard.classList.toggle('hidden',!appSettings.showProgress);if(!appSettings.showProgress)return;let items=day?.items||[],done=items.filter(x=>x.completed).length;homeProgressText.textContent=items.length?`${done} of ${items.length} completed`:'No activities today.'}
 function renderTripSummary(today){let after=today>activeTrip.end_date;tripSummaryCard.classList.toggle('hidden',!after);if(!after)return;let total=cloud.itinerary.length,done=cloud.itinerary.filter(x=>x.completed).length,sum=0;cloud.expenses.forEach(e=>{let v=toMYR(e.amount,e.currency);if(v!=null)sum+=v});tripSummaryBody.innerHTML=`<div class="summaryGrid"><div class="summaryBox"><b>${done}/${total}</b><div class="tiny">Activities completed</div></div><div class="summaryBox"><b>${cloud.places.length}</b><div class="tiny">Saved places</div></div><div class="summaryBox"><b>${myr(sum)}</b><div class="tiny">Total spending</div></div><div class="summaryBox"><b>${cloud.members.length}</b><div class="tiny">Travellers</div></div></div>`}
-function toggleSetting(k){appSettings[k]=!appSettings[k];localStorage.setItem('v69settings',JSON.stringify(appSettings));renderSettings();renderHome()}
-function setBuffer(v){appSettings.buffer=+v||30;localStorage.setItem('v69settings',JSON.stringify(appSettings));renderSettings();renderHome()}
+function toggleSetting(k){appSettings[k]=!appSettings[k];localStorage.setItem('v69settings',JSON.stringify(appSettings));renderSettings();if(activeTrip)renderHome()}
+function setBuffer(v){appSettings.buffer=+v||30;localStorage.setItem('v69settings',JSON.stringify(appSettings));renderSettings();if(activeTrip)renderHome()}
 function renderSettings(){if(typeof progressToggle==='undefined')return;progressToggle.classList.toggle('on',!!appSettings.showProgress);travelToggle.classList.toggle('on',!!appSettings.travelWarning);bufferSelect.value=String(appSettings.buffer||30);aboutVersion.textContent=APP_VERSION;applyLook()}
-function renderEmergency(){if(typeof emergencyList==='undefined')return;emergencyList.innerHTML=cloud.emergency.length?cloud.emergency.map(x=>`<div class="emergencyItem"><b>${x.label}</b><div class="muted">${x.value}</div><button class="danger smallIconBtn" style="float:right;margin-top:-34px" onclick="deleteEmergencyInfo('${x.id}')" aria-label="Delete" title="Delete">🗑</button></div>`).join(''):'<div class="tiny">No emergency information added.</div>'}
-async function addEmergencyInfo(){let label=emLabel.value.trim(),value=emValue.value.trim();if(!label||!value)return;let {error}=await sb.from('trip_emergency_info').insert({trip_id:activeTrip.id,label,value,created_by:user.id,sort_order:cloud.emergency.length});if(error)return alert(error.message);emLabel.value=emValue.value=''}
+function renderEmergency(){if(typeof emergencyList==='undefined')return;emergencyList.innerHTML=cloud.emergency.length?cloud.emergency.map(x=>`<div class="emergencyItem"><b>${escapeHtml(x.label)}</b><div class="muted">${escapeHtml(x.value)}</div><button class="danger smallIconBtn" style="float:right;margin-top:-34px" onclick="deleteEmergencyInfo('${x.id}')" aria-label="Delete" title="Delete">🗑</button></div>`).join(''):'<div class="tiny">No emergency information added.</div>'}
+async function addEmergencyInfo(){
+ const label=emLabel.value.trim(),value=emValue.value.trim();if(!label||!value)return;
+ return saveChange('add-emergency','emergencyForm',tripId=>sb.from('trip_emergency_info').insert({trip_id:tripId,label,value,created_by:user.id,sort_order:cloud.emergency.length}),()=>{emLabel.value=emValue.value=''});
+}
 async function deleteEmergencyInfo(id){let {error}=await sb.from('trip_emergency_info').delete().eq('id',id);if(error)alert(error.message)}
 function safeFileName(n){return n.replace(/[^a-zA-Z0-9._-]+/g,'_').slice(-120)}
-async function uploadTripDocument(){let f=docFile.files?.[0];if(!f)return alert('Choose a file first.');if(f.size>10*1024*1024)return alert('Maximum file size is 10 MB.');let path=`${activeTrip.id}/${user.id}/${Date.now()}_${safeFileName(f.name)}`;let up=await sb.storage.from('trip-documents').upload(path,f,{upsert:false,contentType:f.type||undefined});if(up.error)return alert(up.error.message);let {error}=await sb.from('trip_documents').insert({trip_id:activeTrip.id,file_name:f.name,storage_path:path,mime_type:f.type||null,uploaded_by:user.id});if(error)return alert(error.message);docFile.value=''}
-function renderDocuments(){if(typeof documentList==='undefined')return;documentList.innerHTML=cloud.documents.length?cloud.documents.map(x=>`<div class="docItem"><b>${x.file_name}</b><div class="actions" style="margin-top:6px"><button class="secondary" onclick="openTripDocument('${x.storage_path}')">Open</button><button class="danger smallIconBtn" onclick="deleteTripDocument('${x.id}','${x.storage_path}')" aria-label="Delete" title="Delete">🗑</button></div></div>`).join(''):'<div class="tiny">No documents uploaded.</div>'}
-async function openTripDocument(path){let {data,error}=await sb.storage.from('trip-documents').createSignedUrl(path,300);if(error)return alert(error.message);window.open(data.signedUrl,'_blank')}
+async function uploadTripDocument(){
+ const f=docFile.files?.[0],id=activeTrip?.id,session=tripSession;if(!id)return;
+ if(!f)return alert('Choose a file first.');if(f.size>10*1024*1024)return alert('Maximum file size is 10 MB.');
+ return pendingAction('upload-document','documentForm',async()=>{
+  const path=`${id}/${user.id}/${Date.now()}_${safeFileName(f.name)}`;
+  const up=await sb.storage.from('trip-documents').upload(path,f,{upsert:false,contentType:f.type||undefined});if(up.error)throw up.error;
+  const {error}=await sb.from('trip_documents').insert({trip_id:id,file_name:f.name,storage_path:path,mime_type:f.type||null,uploaded_by:user.id});
+  if(error)throw new Error('The file uploaded, but its trip entry could not be confirmed. Refresh before trying again.');
+  if(session===tripSession){clearDraftFields('documentForm');docFile.value='';await loadCloudData()}return true;
+ });
+}
+function renderDocuments(){if(typeof documentList==='undefined')return;documentList.innerHTML=cloud.documents.length?cloud.documents.map(x=>`<div class="docItem"><b>${escapeHtml(x.file_name)}</b><div class="actions" style="margin-top:6px"><button class="secondary" data-path="${escapeHtml(x.storage_path)}" onclick="openTripDocument(this.dataset.path)">Open</button><button class="danger smallIconBtn" data-path="${escapeHtml(x.storage_path)}" onclick="deleteTripDocument('${x.id}',this.dataset.path)" aria-label="Delete" title="Delete">🗑</button></div></div>`).join(''):'<div class="tiny">No documents uploaded.</div>'}
+async function openTripDocument(path){
+ const tab=window.open('about:blank','_blank');if(tab)tab.opener=null;
+ try{const {data,error}=await sb.storage.from('trip-documents').createSignedUrl(path,300);if(error)throw error;if(tab)tab.location.href=data.signedUrl;else alert('Your browser blocked the document window. Allow pop-ups for Our Trips, then tap Open again.')}
+ catch(error){tab?.close();alert('Could not open document: '+error.message)}
+}
 async function deleteTripDocument(id,path){if(!confirm('Delete this document?'))return;let r=await sb.storage.from('trip-documents').remove([path]);if(r.error)return alert(r.error.message);let {error}=await sb.from('trip_documents').delete().eq('id',id);if(error)return alert(error.message);cloud.documents=cloud.documents.filter(x=>x.id!==id);renderDocuments()}
 function semver(v){return String(v).split('.').map(Number)}
 function versionLess(a,b){let A=semver(a),B=semver(b);for(let i=0;i<Math.max(A.length,B.length);i++){let x=A[i]||0,y=B[i]||0;if(x<y)return true;if(x>y)return false}return false}
 async function checkAppVersion(){try{let {data,error}=await sb.from('app_config').select('*').eq('app_id','our-trips').maybeSingle();if(error||!data)return;if(versionLess(APP_VERSION,data.min_version)){versionBlockText.textContent=`Version ${APP_VERSION} is no longer compatible. Please update to ${data.latest_version} before continuing.`;versionBlock.classList.add('show')}else if(versionLess(APP_VERSION,data.latest_version)){showOurTripsUpdate(null)}}catch(e){console.warn('Version check',e)}}
-function forceAppUpdate(){location.href=location.origin+location.pathname+'?v='+Date.now()}
-window.addEventListener('offline',()=>offlineBanner.classList.add('show'));window.addEventListener('online',()=>offlineBanner.classList.remove('show'));if(!navigator.onLine)offlineBanner.classList.add('show')
+function forceAppUpdate(){if(!mayReloadApp())return;location.href=location.origin+location.pathname+'?v='+Date.now()}
+function updateConnection(){
+ document.getElementById('offlineBanner')?.classList.toggle('show',!navigator.onLine);
+ if(user)updateCloudStatus();
+}
+window.addEventListener('offline',updateConnection);
+window.addEventListener('online',()=>{updateConnection();if(user)refreshCloud()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&user&&navigator.onLine&&Date.now()-lastCloudRead>15000)refreshCloud()});
 
 function avatarFallback(name='?'){return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" rx="50" fill="#2456aa"/><text x="50" y="63" text-anchor="middle" font-size="48" fill="white">${(name||'?')[0].toUpperCase()}</text></svg>`)}`}
-function renderMap(){if(!activeTrip||!document.getElementById('mapbox'))return;if(!map){map=L.map('mapbox').setView(activeTrip.city==='Seoul'?[37.5665,126.978]:[20,0],activeTrip.city==='Seoul'?11:2);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap'}).addTo(map)}else map.invalidateSize();mapMarkers.forEach(x=>map.removeLayer(x));mapMarkers=[];let pts=[];cloud.locations.forEach(l=>{let mem=cloud.members.find(m=>m.user_id===l.user_id),name=mem?.display_name||'Traveller',src=mem?.avatar_url||avatarFallback(name),icon=L.divIcon({html:`<img class="markerAvatar" src="${src}">`,className:'',iconSize:[42,42],iconAnchor:[21,21]});let m=L.marker([l.latitude,l.longitude],{icon}).addTo(map).bindPopup(`<b>${name}</b><br>Updated ${new Date(l.updated_at).toLocaleTimeString()}`);mapMarkers.push(m);pts.push([l.latitude,l.longitude])});if(pts.length)map.fitBounds(pts,{padding:[40,40]})}
+function renderMap(){if(!activeTrip||!document.getElementById('mapbox'))return;if(typeof L==='undefined'){mapbox.textContent='Map unavailable. Reconnect and reload to view the map.';return}if(!map){map=L.map('mapbox').setView(activeTrip.city==='Seoul'?[37.5665,126.978]:[20,0],activeTrip.city==='Seoul'?11:2);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap'}).addTo(map)}else map.invalidateSize();mapMarkers.forEach(x=>map.removeLayer(x));mapMarkers=[];let pts=[];cloud.locations.forEach(l=>{let mem=cloud.members.find(m=>m.user_id===l.user_id),name=mem?.display_name||'Traveller',src=mem?.avatar_url||avatarFallback(name),icon=L.divIcon({html:`<img class="markerAvatar" src="${escapeHtml(src)}">`,className:'',iconSize:[42,42],iconAnchor:[21,21]});let m=L.marker([l.latitude,l.longitude],{icon}).addTo(map).bindPopup(`<b>${escapeHtml(name)}</b><br>Updated ${new Date(l.updated_at).toLocaleTimeString()}`);mapMarkers.push(m);pts.push([l.latitude,l.longitude])});if(pts.length)map.fitBounds(pts,{padding:[40,40]})}
 function toggleLocation(){locationWatch==null?startLocation():stopLocation()}
-function startLocation(){if(!navigator.geolocation)return alert('Location is not supported.');locationToggle.classList.add('on');locationStatus.textContent='Sharing while app is active';locationWatch=navigator.geolocation.watchPosition(async p=>{let payload={trip_id:activeTrip.id,user_id:user.id,latitude:p.coords.latitude,longitude:p.coords.longitude,accuracy:p.coords.accuracy,updated_at:new Date().toISOString()};let {error}=await sb.from('member_locations').upsert(payload,{onConflict:'trip_id,user_id'});if(error)console.warn(error)},e=>{alert(e.message);stopLocation()},{enableHighAccuracy:true,maximumAge:10000,timeout:15000})}
+function startLocation(){if(!navigator.geolocation)return alert('Location is not supported.');locationToggle.classList.add('on');locationStatus.textContent='Sharing while app is active';const locationTrip=activeTrip.id,locationSession=tripSession;locationWatch=navigator.geolocation.watchPosition(async p=>{if(activeTrip?.id!==locationTrip||tripSession!==locationSession)return;let payload={trip_id:locationTrip,user_id:user.id,latitude:p.coords.latitude,longitude:p.coords.longitude,accuracy:p.coords.accuracy,updated_at:new Date().toISOString()};let {error}=await sb.from('member_locations').upsert(payload,{onConflict:'trip_id,user_id'});if(error)console.warn(error)},e=>{alert(e.message);stopLocation()},{enableHighAccuracy:true,maximumAge:10000,timeout:15000})}
 function stopLocation(){if(locationWatch!=null)navigator.geolocation.clearWatch(locationWatch);locationWatch=null;if(typeof locationToggle!=='undefined'){locationToggle.classList.remove('on');locationStatus.textContent='Off'}}
 function weatherScene(rain,t){wx.innerHTML='';if(t>=24&&rain<35){let s=document.createElement('div');s.className='sun';wx.appendChild(s)}for(let [i,c] of [0,1].entries()){let e=document.createElement('div');e.className='cloud '+(i?'c2':'c1');e.textContent='☁️';wx.appendChild(e)}if(rain>=40){for(let i=0;i<22;i++){let d=document.createElement('span');d.className='drop';d.style.left=(Math.random()*100)+'%';d.style.animationDuration=(.7+Math.random()*1.1)+'s';d.style.animationDelay=(-Math.random()*2)+'s';d.style.opacity=.25+Math.random()*.35;wx.appendChild(d)}}if(t<=2){for(let i=0;i<18;i++){let f=document.createElement('span');f.className='flake';f.textContent='❄';f.style.left=(Math.random()*100)+'%';f.style.animationDuration=(4+Math.random()*5)+'s';f.style.animationDelay=(-Math.random()*5)+'s';f.style.opacity=.25+Math.random()*.5;wx.appendChild(f)}}}
-async function loadWeather(){if(!activeTrip?.city)return;try{let q=encodeURIComponent(activeTrip.city);let g=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${q}&count=1&language=en&format=json`).then(r=>r.json()),hit=g.results?.[0];if(!hit)throw new Error('No coordinates');let r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${hit.latitude}&longitude=${hit.longitude}&current=temperature_2m,apparent_temperature&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=5`),d=await r.json(),rain=d.daily.precipitation_probability_max[0]||0,t=Math.round(d.current.temperature_2m);temp.textContent=t+'°C';wtext.textContent=`Feels ${Math.round(d.current.apparent_temperature)}°C · H ${Math.round(d.daily.temperature_2m_max[0])}° / L ${Math.round(d.daily.temperature_2m_min[0])}° · Rain ${rain}%`;weatherScene(rain,t);forecast.innerHTML=d.daily.time.map((x,i)=>`<div><b>${new Date(x+'T12:00').toLocaleDateString('en',{weekday:'short'})}</b><div>${(d.daily.precipitation_probability_max[i]||0)>50?'🌧️':'⛅'}</div><b>${Math.round(d.daily.temperature_2m_max[i])}°</b><div class="tiny">${Math.round(d.daily.temperature_2m_min[i])}° · ☔${d.daily.precipitation_probability_max[i]||0}%</div></div>`).join('')}catch(e){temp.textContent='—';wtext.textContent=navigator.onLine?'Weather temporarily unavailable':'Offline · weather will return when connected';forecast.innerHTML=''}}
-async function refreshCloud(){await loadTrips();if(activeTrip)await loadCloudData()}
+async function loadWeather(){if(!activeTrip?.city)return;const request=++weatherRequest,session=tripSession;try{let q=encodeURIComponent(activeTrip.city);let g=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${q}&count=1&language=en&format=json`).then(r=>r.json()),hit=g.results?.[0];if(!hit)throw new Error('No coordinates');let r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${hit.latitude}&longitude=${hit.longitude}&current=temperature_2m,apparent_temperature&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=5`),d=await r.json(),rain=d.daily.precipitation_probability_max[0]||0,t=Math.round(d.current.temperature_2m);if(request!==weatherRequest||session!==tripSession)return;temp.textContent=t+'°C';wtext.textContent=`Feels ${Math.round(d.current.apparent_temperature)}°C · H ${Math.round(d.daily.temperature_2m_max[0])}° / L ${Math.round(d.daily.temperature_2m_min[0])}° · Rain ${rain}%`;weatherScene(rain,t);forecast.innerHTML=d.daily.time.map((x,i)=>`<div><b>${new Date(x+'T12:00').toLocaleDateString('en',{weekday:'short'})}</b><div>${(d.daily.precipitation_probability_max[i]||0)>50?'🌧️':'⛅'}</div><b>${Math.round(d.daily.temperature_2m_max[i])}°</b><div class="tiny">${Math.round(d.daily.temperature_2m_min[i])}° · ☔${d.daily.precipitation_probability_max[i]||0}%</div></div>`).join('')}catch(e){if(request!==weatherRequest||session!==tripSession)return;temp.textContent='—';wtext.textContent=navigator.onLine?'Weather temporarily unavailable':'Offline · weather will return when connected';forecast.innerHTML=''}}
+async function refreshCloud(){
+ const ok=await loadTrips();
+ if(activeTrip){if(realtimeState!=='SUBSCRIBED')subscribeRealtime();await loadCloudData()}
+ return ok;
+}
 function setFont(v){
   const allowed=['14px','16px','18px','20px'];
   if(!allowed.includes(v))v='16px';
@@ -670,50 +973,50 @@ function setFont(v){
   if(typeof fontSize!=='undefined')fontSize.value=v;
   localStorage.setItem('v6font',v);
 }
-sb.auth.onAuthStateChange((event,session)=>{if(session?.user&&!user)enterApp(session.user);if(!session?.user&&user)location.reload()});
-(async()=>{let {data}=await sb.auth.getSession();if(data.session?.user)await enterApp(data.session.user);let f=localStorage.getItem('v6font')||'16px';setFont(f)})();
-if('serviceWorker'in navigator)registerOurTripsServiceWorker();
+async function initializeApp(){
+ updateConnection();applyLook();
+ if(!sb){authSubmit.disabled=true;msg('The sign-in service could not load. Reconnect and reload this page.',true);return}
+ sb.auth.onAuthStateChange((event,session)=>{if(session?.user&&!user)queueMicrotask(()=>enterApp(session.user));if(!session?.user&&user)location.reload()});
+ try{const {data,error}=await sb.auth.getSession();if(error)throw error;if(data.session?.user&&!user)await enterApp(data.session.user)}catch(error){msg('Could not restore sign-in. Please sign in again.',true)}
+ let font='16px';try{font=localStorage.getItem('v6font')||font}catch(_){}setFont(font);
+ registerOurTripsServiceWorker();
+}
 
-// V6.3: predictable PWA updates. HTML is network-first in sw.js.
-let pendingOurTripsWorker = null;
+
+// V6.12: updates reload only after an explicit choice, with unsaved-entry protection.
+let pendingOurTripsWorker=null,updateRequested=false,updateReloading=false,serviceWorkerRegistration=null;
 function showOurTripsUpdate(worker){
-  pendingOurTripsWorker = worker || null;
-  const bar = document.getElementById('appUpdateBar');
-  if(bar) bar.classList.add('show');
+ if(worker)pendingOurTripsWorker=worker;
+ document.getElementById('appUpdateBar')?.classList.add('show');
+}
+function mayReloadApp(){
+ if(actionGuard.busy){alert('Please wait for the current save to finish before updating.');return false}
+ if(hasUnsavedEntries()&&!confirm('Update and reload? Entries you have not saved will be discarded.'))return false;
+ draftFields.clear();return true;
 }
 async function registerOurTripsServiceWorker(){
-  if(!('serviceWorker' in navigator)) return;
-  try{
-    const reg = await navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'});
-    reg.update().catch(()=>{});
-    if(reg.waiting && navigator.serviceWorker.controller) showOurTripsUpdate(reg.waiting);
-    reg.addEventListener('updatefound', ()=>{
-      const w = reg.installing;
-      if(!w) return;
-      w.addEventListener('statechange', ()=>{
-        if(w.state === 'installed' && navigator.serviceWorker.controller) showOurTripsUpdate(w);
-      });
-    });
-    navigator.serviceWorker.addEventListener('controllerchange', ()=>{
-      if(sessionStorage.getItem('ourTripsReloading') === '1') return;
-      sessionStorage.setItem('ourTripsReloading','1');
-      location.reload();
-    });
-  }catch(e){ console.warn('Service worker registration failed', e); }
+ if(!('serviceWorker' in navigator)||serviceWorkerRegistration)return;
+ try{
+  const reg=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});serviceWorkerRegistration=reg;
+  reg.update().catch(()=>{});
+  if(reg.waiting&&navigator.serviceWorker.controller)showOurTripsUpdate(reg.waiting);
+  reg.addEventListener('updatefound',()=>{const worker=reg.installing;if(worker)worker.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)showOurTripsUpdate(worker)})});
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!updateRequested||updateReloading)return;updateReloading=true;location.reload()});
+ }catch(error){console.warn('Service worker registration failed',error)}
 }
-document.addEventListener('DOMContentLoaded', ()=>{
-  const b=document.getElementById('applyAppUpdate');
-  if(b) b.addEventListener('click', ()=>{
-    if(pendingOurTripsWorker) pendingOurTripsWorker.postMessage({type:'SKIP_WAITING'});
-    else location.reload();
-  });
-  registerOurTripsServiceWorker();
+document.addEventListener('DOMContentLoaded',()=>{
+ initializeApp();
+ document.getElementById('applyAppUpdate')?.addEventListener('click',()=>{
+  if(!mayReloadApp())return;updateRequested=true;
+  if(pendingOurTripsWorker)pendingOurTripsWorker.postMessage({type:'SKIP_WAITING'});else location.reload();
+ });
 });
+
 
 </script>
 
 
-<div id="offlineBanner" class="offlineBanner">📴 Offline — cloud changes will sync when you reconnect.</div>
+<div id="offlineBanner" class="offlineBanner">Offline · reconnect before saving. Entries stay in this open page.</div>
 <div id="versionBlock" class="versionBlock"><div class="card"><img src="./icon-192.png" class="authLogo"><h2>Our Trips needs an update</h2><p id="versionBlockText" class="muted"></p><button class="primary" onclick="forceAppUpdate()">Update Now</button></div></div>
 
 <div id="appUpdateBar" role="status" aria-live="polite">
